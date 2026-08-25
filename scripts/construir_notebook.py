@@ -426,8 +426,9 @@ code(r"""
 ARCHIVOS = {
     "Train": CRUDOS / "Train.csv",
     "Test": CRUDOS / "Test.csv",
-    "SampleSubmission": CRUDOS / "SampleSubmission.csv",
 }
+# SampleSubmission solo define el formato de entrega; no interviene en el EDA.
+OPCIONALES = {"SampleSubmission": CRUDOS / "SampleSubmission.csv"}
 
 faltantes = [n for n, ruta in ARCHIVOS.items() if not ruta.exists()]
 if faltantes:
@@ -437,19 +438,18 @@ if faltantes:
         "siguiendo las instrucciones de data/raw/README.md."
     )
 
-for nombre, ruta in ARCHIVOS.items():
-    print(f"{nombre:18} {ruta.stat().st_size / 1024**2:8.1f} MB")
+for nombre, ruta in {**ARCHIVOS, **OPCIONALES}.items():
+    estado = f"{ruta.stat().st_size / 1024**2:8.1f} MB" if ruta.exists() else "no disponible"
+    print(f"{nombre:18} {estado}")
 """)
 
 code(r"""
 # Lectura completa. Se mide el tiempo porque Train.csv es grande.
-train = pd.read_csv(ARCHIVOS["Train"])
-test = pd.read_csv(ARCHIVOS["Test"])
-muestra_envio = pd.read_csv(ARCHIVOS["SampleSubmission"])
+train = pd.read_csv(ARCHIVOS["Train"], parse_dates=["time"])
+test = pd.read_csv(ARCHIVOS["Test"], parse_dates=["time"])
 
-print(f"train             {train.shape[0]:>10,} filas x {train.shape[1]:>2} columnas")
-print(f"test              {test.shape[0]:>10,} filas x {test.shape[1]:>2} columnas")
-print(f"muestra_envio     {muestra_envio.shape[0]:>10,} filas x {muestra_envio.shape[1]:>2} columnas")
+print(f"train  {train.shape[0]:>10,} filas x {train.shape[1]:>2} columnas")
+print(f"test   {test.shape[0]:>10,} filas x {test.shape[1]:>2} columnas")
 """)
 
 code(r"""
@@ -486,12 +486,13 @@ print("Columnas de train:")
 print(list(train.columns))
 print("\nColumnas de test:")
 print(list(test.columns))
-print("\nColumnas de SampleSubmission:")
-print(list(muestra_envio.columns))
 
-# Diferencia de columnas: identifica cuál es la variable objetivo.
+# Diferencia de columnas en ambos sentidos: identifica la variable objetivo y
+# las columnas que solo existen en el conjunto de prueba.
 solo_en_train = [c for c in train.columns if c not in test.columns]
-print(f"\nColumnas presentes en train pero no en test: {solo_en_train}")
+solo_en_test = [c for c in test.columns if c not in train.columns]
+print(f"\nSolo en train : {solo_en_train}")
+print(f"Solo en test  : {solo_en_test}")
 """)
 
 code(r"""
@@ -504,8 +505,6 @@ display(train.tail())
 print("Primeras observaciones de test:")
 display(test.head())
 
-print("Formato de entrega esperado:")
-display(muestra_envio.head())
 """)
 
 code(r"""
@@ -536,6 +535,7 @@ def clasificar_columnas(df):
         "satelital_tws": [],
         "climatica_spei": [],
         "climatica_suelo": [],
+        "temporal_derivada": [],
         "otra": [],
     }
     for col in df.columns:
@@ -548,12 +548,16 @@ def clasificar_columnas(df):
             roles["geografica"].append(col)
         elif c == "target":
             roles["objetivo"].append(col)
-        elif "tws" in c:
+        elif "tws" in c and not c.endswith("_masked"):
             roles["satelital_tws"].append(col)
+        elif c.endswith("_masked"):
+            roles["otra"].append(col)
         elif "spei" in c:
             roles["climatica_spei"].append(col)
         elif "soil" in c or "moisture" in c:
             roles["climatica_suelo"].append(col)
+        elif c.startswith("month_"):
+            roles["temporal_derivada"].append(col)
         else:
             roles["otra"].append(col)
     return roles
@@ -579,6 +583,8 @@ COLS_NUMERICAS = [
     c for c in ([COL_TWS] + COLS_SPEI + [COL_SUELO, COL_OBJETIVO]) if c is not None
 ]
 
+COLS_CICLICAS = roles["temporal_derivada"]
+
 print(f"\nVariable objetivo    : {COL_OBJETIVO}")
 print(f"Variables numéricas  : {COLS_NUMERICAS}")
 """)
@@ -594,8 +600,13 @@ descripciones = {
     COL_SUELO: "Humedad del suelo cercana a la superficie en el mes t.",
     COL_OBJETIVO: "Variable objetivo: almacenamiento total de agua del mes t+1.",
 }
+escalas = {"01": "1 mes", "03": "3 meses", "06": "6 meses", "12": "12 meses"}
 for c in COLS_SPEI:
-    descripciones[c] = "Índice SPEI (precipitación menos evapotranspiración potencial estandarizado)."
+    escala = next((v for k, v in escalas.items() if k in c), "escala no identificada")
+    descripciones[c] = f"Índice SPEI acumulado a {escala}: déficit o exceso hídrico estandarizado."
+for c in roles["temporal_derivada"]:
+    descripciones[c] = ("Codificación cíclica del mes del año, ya incluida por la organización "
+                        "del reto (seno y coseno del ángulo del mes).")
 
 resumen_variables = pd.DataFrame({
     "Tipo": train.dtypes.astype(str),
@@ -611,6 +622,23 @@ resumen_variables.index.name = "Variable"
 display(resumen_variables)
 
 resumen_variables.to_csv(TABLAS / "resumen_variables.csv")
+""")
+
+md(r"""
+La tabla confirma la estructura del archivo y deja ver tres cosas que conviene
+fijar antes de seguir:
+
+1. **No hay un solo valor faltante** en ninguna de las 13 columnas, y `sample_id`
+   tiene 2 154 021 valores únicos, es decir, uno por fila: no hay registros
+   repetidos.
+2. `month_sin` y `month_cos` tienen apenas **8 valores únicos** cada una. No son
+   variables medidas sino una **codificación del mes** que la organización ya
+   incluyó; los 8 valores distintos surgen de que el seno y el coseno de los 12
+   meses se repiten por simetría. Se excluyen del análisis estadístico porque
+   describen el calendario, no el sistema hídrico.
+3. `time` tiene 138 valores únicos y las coordenadas 140 latitudes y 358
+   longitudes. Esos números se examinan en detalle en las secciones 10 y 11,
+   porque no cuadran con un periodo continuo ni con una rejilla completa.
 """)
 
 # =============================================================================
@@ -640,6 +668,108 @@ if COL_ID is not None:
 claves = [c for c in (COL_FECHA, COL_LAT, COL_LON) if c is not None]
 if claves:
     print(f"Duplicados por {claves}: {train.duplicated(subset=claves).sum():,}")
+""")
+
+md(r"""
+### 10.1 Los faltantes no están donde se esperaba
+
+El resultado anterior es contundente: **el archivo de entrenamiento no contiene un
+solo valor nulo**, y tampoco filas duplicadas. Sería un error concluir de ahí que
+el conjunto no tiene problemas de cobertura. Lo que ocurre es que los datos vienen
+en formato «plano», con una fila por combinación observada de tiempo y celda: si
+un mes no fue observado, sencillamente **no aparece ninguna fila**, en vez de
+aparecer una fila con `NaN`.
+
+Por eso el faltante hay que buscarlo comparando lo observado contra el calendario
+completo y contra la rejilla completa, que es lo que hacen las celdas siguientes.
+""")
+
+code(r"""
+# Faltantes estructurales en el tiempo: meses del calendario sin ninguna fila.
+calendario_completo = pd.date_range(train[COL_FECHA].min(), train[COL_FECHA].max(), freq="MS")
+meses_observados = pd.DatetimeIndex(sorted(train[COL_FECHA].unique()))
+meses_ausentes = calendario_completo.difference(meses_observados)
+
+print(f"Rango temporal          : {calendario_completo.min().date()} a {calendario_completo.max().date()}")
+print(f"Meses del calendario    : {len(calendario_completo)}")
+print(f"Meses con observaciones : {len(meses_observados)}")
+print(f"Meses ausentes          : {len(meses_ausentes)} "
+      f"({len(meses_ausentes)/len(calendario_completo)*100:.1f}% del periodo)")
+print("\nMeses sin ninguna observación:")
+print(", ".join(d.strftime("%Y-%m") for d in meses_ausentes))
+""")
+
+code(r"""
+# Distribución de los meses ausentes por año.
+ausentes_por_anio = pd.Series(meses_ausentes.year).value_counts().sort_index()
+observados_por_anio = pd.Series(meses_observados.year).value_counts().sort_index()
+cobertura_anual = pd.DataFrame({
+    "meses_observados": observados_por_anio,
+    "meses_ausentes": ausentes_por_anio,
+}).fillna(0).astype(int)
+cobertura_anual["cobertura_%"] = (
+    cobertura_anual["meses_observados"]
+    / (cobertura_anual["meses_observados"] + cobertura_anual["meses_ausentes"]) * 100
+).round(1)
+display(cobertura_anual)
+
+fig, ax = plt.subplots(figsize=(13, 4.5))
+ax.bar(cobertura_anual.index.astype(str), cobertura_anual["meses_observados"], label="Meses observados")
+ax.bar(cobertura_anual.index.astype(str), cobertura_anual["meses_ausentes"],
+       bottom=cobertura_anual["meses_observados"], label="Meses ausentes")
+ax.set(title="Cobertura temporal del conjunto de entrenamiento",
+       xlabel="Año", ylabel="Meses del año")
+ax.legend()
+guardar_figura("10_cobertura_temporal")
+plt.show()
+""")
+
+code(r"""
+# Faltantes estructurales en el espacio: celdas sin la serie completa.
+meses_por_celda = train.groupby([COL_LAT, COL_LON], observed=True).size()
+n_celdas = len(meses_por_celda)
+n_meses = len(meses_observados)
+
+print(f"Celdas de la rejilla                  : {n_celdas:,}")
+print(f"Filas si toda celda tuviera todo mes  : {n_celdas * n_meses:,}")
+print(f"Filas observadas                      : {len(train):,}")
+print(f"Combinaciones ausentes                : {n_celdas * n_meses - len(train):,} "
+      f"({(1 - len(train)/(n_celdas*n_meses))*100:.2f}%)")
+print(f"\nCeldas con la serie completa          : {(meses_por_celda == n_meses).sum():,} "
+      f"({(meses_por_celda == n_meses).mean()*100:.1f}%)")
+print(f"Mínimo de meses en una celda          : {meses_por_celda.min()}")
+
+fig, ax = plt.subplots(figsize=(13, 4))
+ax.hist(meses_por_celda.values, bins=60)
+ax.set(title="Número de meses observados por celda de la rejilla",
+       xlabel="Meses con dato", ylabel="Número de celdas")
+guardar_figura("10_meses_por_celda")
+plt.show()
+""")
+
+code(r"""
+# El conjunto de prueba tiene su propio patrón de cobertura, que conviene contrastar.
+meses_test = pd.DatetimeIndex(sorted(test[COL_FECHA].unique()))
+calendario_test = pd.date_range(meses_test.min(), meses_test.max(), freq="MS")
+
+print(f"Rango del conjunto de prueba : {meses_test.min().date()} a {meses_test.max().date()}")
+print(f"Meses del calendario         : {len(calendario_test)}")
+print(f"Meses presentes en test      : {len(meses_test)}")
+print("Meses presentes:", ", ".join(d.strftime("%Y-%m") for d in meses_test))
+
+# Enmascaramiento deliberado de TWS_t en el conjunto de prueba.
+col_mascara = next((c for c in test.columns if c.lower().endswith("_masked")), None)
+if col_mascara is not None:
+    print(f"\nFilas con {COL_TWS} enmascarado: {test[col_mascara].sum():,} "
+          f"({test[col_mascara].mean()*100:.2f}%)")
+""")
+
+md(r"""
+El enmascaramiento del conjunto de prueba **no es un defecto de los datos**. La
+documentación oficial del reto explica que se introdujo a propósito para evitar
+que el valor de `TWS_t` de una fila revele el objetivo oculto de otra fila de la
+misma celda el mes anterior. Es una medida contra la fuga de información, y por
+eso viene señalizado con su propia columna indicadora.
 """)
 
 # =============================================================================
@@ -695,8 +825,7 @@ display(df[[COL_FECHA, "anio", "mes", "trimestre", "hemisferio", "banda_latitud"
 """)
 
 code(r"""
-# Cobertura de la rejilla: cuántas celdas hay y con qué resolución.
-n_celdas = df.groupby([COL_LAT, COL_LON], observed=True).ngroups
+# Resolución de la rejilla.
 lats = np.sort(df[COL_LAT].unique())
 lons = np.sort(df[COL_LON].unique())
 paso_lat = np.diff(lats).min() if len(lats) > 1 else np.nan
@@ -705,13 +834,55 @@ paso_lon = np.diff(lons).min() if len(lons) > 1 else np.nan
 print(f"Celdas únicas de la rejilla : {n_celdas:,}")
 print(f"Latitudes únicas            : {len(lats):,}  (de {lats.min()} a {lats.max()})")
 print(f"Longitudes únicas           : {len(lons):,}  (de {lons.min()} a {lons.max()})")
-print(f"Paso mínimo en latitud      : {paso_lat}")
-print(f"Paso mínimo en longitud     : {paso_lon}")
+print(f"Paso en latitud             : {paso_lat}°")
+print(f"Paso en longitud            : {paso_lon}°")
+""")
 
-meses = df[COL_FECHA].nunique()
-print(f"\nMeses en la serie           : {meses}")
-print(f"Filas esperadas si la rejilla estuviera completa: {n_celdas * meses:,}")
-print(f"Filas observadas                                : {len(df):,}")
+md(r"""
+### 11.1 Verificación de cómo se construyó la variable objetivo
+
+La documentación indica que `target` es el almacenamiento del mes siguiente. Vale
+la pena comprobarlo directamente en lugar de confiar en la descripción, porque de
+ello depende toda la interpretación posterior: se compara, celda por celda, el
+`target` de un mes contra el `TWS_t` del registro siguiente de esa misma celda.
+""")
+
+code(r"""
+# Para cada celda, se toma el siguiente registro disponible en el tiempo.
+orden = df.sort_values([COL_LAT, COL_LON, COL_FECHA])
+grupos = orden.groupby([COL_LAT, COL_LON], sort=False)
+orden["tws_siguiente"] = grupos[COL_TWS].shift(-1)
+orden["fecha_siguiente"] = grupos[COL_FECHA].shift(-1)
+
+comparables = orden.dropna(subset=["tws_siguiente"])
+coincide = np.isclose(comparables[COL_OBJETIVO], comparables["tws_siguiente"], atol=1e-5)
+
+# Salto en meses entre un registro y el siguiente de la misma celda.
+salto = ((comparables["fecha_siguiente"].dt.year - comparables[COL_FECHA].dt.year) * 12
+         + (comparables["fecha_siguiente"].dt.month - comparables[COL_FECHA].dt.month))
+
+print(f"Filas con registro siguiente en la misma celda: {len(comparables):,}")
+print(f"En las que target coincide con ese TWS        : {coincide.sum():,} "
+      f"({coincide.mean()*100:.2f}%)")
+
+tabla_salto = pd.DataFrame({
+    "filas": salto.value_counts().sort_index(),
+    "coinciden": salto[coincide].value_counts().sort_index(),
+}).fillna(0).astype(int).head(8)
+tabla_salto.index.name = "salto en meses"
+display(tabla_salto)
+""")
+
+md(r"""
+La tabla anterior resuelve la pregunta con precisión. La coincidencia es
+prácticamente total **cuando el salto al registro siguiente es de un mes**, y
+desaparece cuando el salto es mayor. La conclusión es que `target` corresponde
+siempre al mes calendario `t+1`, no «al siguiente mes disponible».
+
+Esto tiene una consecuencia que conviene tener presente al modelar: para las
+filas cuyo mes `t+1` es uno de los meses ausentes del archivo, el valor de
+`target` es **la única información disponible sobre ese mes**. No es un dato
+redundante, sino la observación de un mes que no aparece como fila propia.
 """)
 
 # =============================================================================
@@ -753,6 +924,38 @@ for col in COLS_NUMERICAS:
     )
 
 display(Markdown("**Resumen calculado sobre los datos:**\n\n" + "\n".join(lineas)))
+""")
+
+md(r"""
+### 12.1 Lectura de los resultados
+
+**Las variables están estandarizadas y son adimensionales.** Todas tienen media
+cercana a cero y desviación cercana a uno: `TWS_t` presenta media 0.117 y
+desviación 0.913, y `target` media 0.113 y desviación 0.912. Esto **no** son
+centímetros de lámina de agua, que es la unidad habitual de los productos GRACE.
+Es un dato importante y fácil de pasar por alto: los valores no pueden
+interpretarse como volúmenes, solo como desviaciones relativas respecto a la
+referencia con la que fueron estandarizados. Cualquier afirmación sobre "cuánta"
+agua se perdió en términos físicos quedaría fuera de lo que estos datos permiten
+sostener.
+
+**Las distribuciones son casi simétricas.** Los coeficientes de asimetría son muy
+pequeños en todas las variables (entre −0.14 y 0.09), y en cada una la media y la
+mediana casi coinciden. Es el comportamiento esperable de índices estandarizados y
+contrasta con lo que suele encontrarse en datos de conteo o de volumen, donde la
+asimetría a la derecha es la norma.
+
+**Los SPEI tienen media ligeramente negativa, y la desviación crece con la escala
+de acumulación.** Las medias van de −0.030 en `SPEI_01_t` a −0.093 en `SPEI_12_t`:
+cuanto más largo es el periodo acumulado, más negativo es el promedio. Es un
+indicio de déficit hídrico sostenido en el conjunto del periodo, aunque de
+magnitud modesta.
+
+**`SOIL_MOISTURE_t` es la variable más concentrada y la de cola más larga.** Su
+desviación es 0.788, claramente menor que la del resto, y su IQR de 0.948 es el
+más estrecho; sin embargo, su rango total (10.49) es el más amplio de todas. Es
+decir: la mayoría de las observaciones se agrupan en un intervalo angosto, pero
+existen valores muy alejados. Esto anticipa lo que se verá en la sección 15.
 """)
 
 # =============================================================================
@@ -857,6 +1060,32 @@ if COLS_SPEI:
     plt.show()
 """)
 
+md(r"""
+### 13.1 Lectura de las variables categóricas
+
+**El conjunto está fuertemente desbalanceado en el espacio.** El hemisferio norte
+concentra el 80.3 % de las observaciones frente a un 19.7 % del sur, y dos bandas
+—templada norte (30.7 %) y polar norte (24.9 %)— reúnen por sí solas más de la
+mitad del total. La banda polar sur **no tiene ninguna observación**. Esto no es un
+error de los datos: refleja la distribución real de tierra emergida en el planeta y
+el hecho de que la Antártida queda fuera de la cobertura, algo coherente con el
+rango de latitudes observado, que llega hasta −55.5° por el sur y hasta 83.5° por
+el norte. La consecuencia práctica es que **cualquier promedio "global" de este
+conjunto está dominado por el hemisferio norte**, y así debe interpretarse.
+
+**La cobertura por año tampoco es uniforme.** Los años 2004 a 2010 aportan cada
+uno alrededor del 8.7 % de las observaciones, mientras que 2011 a 2015 aportan
+entre 5.1 % y 5.8 %, y 2002 solo 3.6 %. Esta caída se explica por los meses
+ausentes que se documentaron en la sección 10, no por una pérdida de celdas.
+
+**Según el SPEI a un mes, cerca de una de cada seis observaciones corresponde a
+condiciones de sequía.** El 66.9 % se clasifica como normal, mientras que las tres
+categorías de sequía suman 17.3 % (11.6 % moderada, 4.8 % severa y 0.9 % extrema) y
+las tres húmedas suman 15.8 %. La distribución es aproximadamente simétrica en
+torno a la categoría normal, lo que es consistente con que el SPEI sea un índice
+estandarizado por construcción.
+""")
+
 # =============================================================================
 # 14. Distribuciones
 # =============================================================================
@@ -887,6 +1116,24 @@ for ax in axes[n:]:
 plt.tight_layout()
 guardar_figura("14_histogramas_variables")
 plt.show()
+""")
+
+md(r"""
+### 14.1 Lectura de los histogramas
+
+Los seis histogramas muestran distribuciones **unimodales y aproximadamente
+simétricas**, sin indicios de mezcla de poblaciones: en ninguna aparece un segundo
+máximo que sugiera dos regímenes distintos superpuestos. En todas las variables la
+línea de la media y la de la mediana quedan prácticamente encima una de la otra,
+lo que confirma numéricamente lo que la forma sugiere.
+
+`TWS_t` y `target` tienen histogramas casi indistinguibles entre sí, algo esperable
+si una es la otra desplazada un mes: comparten mínimo (−3.968) y máximo (4.057).
+
+La diferencia más marcada la presenta `SOIL_MOISTURE_t`, con un pico central mucho
+más alto y estrecho que el resto y colas visiblemente más largas. Es la firma de una
+variable donde la enorme mayoría de las observaciones está cerca de lo normal y unas
+pocas se apartan mucho, y explica por qué será la variable con más atípicos.
 """)
 
 # =============================================================================
@@ -957,6 +1204,37 @@ axes[1].tick_params(axis="x", rotation=30)
 plt.tight_layout()
 guardar_figura("15_atipicos_tiempo_espacio")
 plt.show()
+""")
+
+md(r"""
+### 15.1 Lectura de los valores atípicos
+
+**La proporción de atípicos es muy baja en casi todas las variables.** Con el
+criterio del IQR, `target` y `TWS_t` marcan un 0.25 % de las observaciones y los
+cuatro SPEI apenas entre 0.02 % y 0.03 %. La excepción clara es
+`SOIL_MOISTURE_t` con **2.58 %**, diez veces más que la variable objetivo, lo cual
+concuerda con la forma de su histograma: al ser una distribución muy concentrada,
+el IQR resulta estrecho y el criterio marca como extremo un conjunto de valores
+más amplio.
+
+Esto ilustra una limitación del método que conviene explicitar: **la regla del IQR
+mide qué tan lejos está un valor del grueso de la distribución, no si el valor es
+erróneo**. En una variable muy concentrada marca más observaciones sin que ello
+implique más errores.
+
+**Decisión: no se elimina ningún valor atípico.** Las razones son concretas y se
+apoyan en lo observado:
+
+- Los valores extremos de `target` alcanzan −3.97 y 4.06, magnitudes plausibles
+  para anomalías estandarizadas de almacenamiento; no hay valores imposibles, ni
+  saltos de escala, ni códigos centinela del tipo −9999.
+- Los gráficos de esta sección muestran que los atípicos **no se distribuyen al
+  azar**: se concentran en determinados años y bandas de latitud. Ese
+  agrupamiento es la firma de eventos hidrológicos reales —sequías e
+  inundaciones prolongadas— y no de errores de medición, que no tendrían por qué
+  agruparse así.
+- Son precisamente los eventos extremos los que el reto busca anticipar.
+  Eliminarlos equivaldría a borrar el fenómeno de interés.
 """)
 
 # =============================================================================
@@ -1039,6 +1317,33 @@ guardar_figura("16_hemisferios_y_anual")
 plt.show()
 
 display(promedio_anual.to_frame("promedio_anual"))
+""")
+
+md(r"""
+### 16.1 Lectura del comportamiento temporal
+
+**Existe una tendencia descendente clara.** El promedio anual de `target` pasa de
+0.322 en 2004 —su valor más alto— a −0.136 en 2015, con caída sostenida desde
+2008. Los últimos cuatro años del periodo (2012, 2013 y 2015) son los únicos con
+promedio negativo. En términos del propio conjunto, esto significa que hacia el
+final del registro el almacenamiento de agua está sistemáticamente por debajo de
+la referencia con la que se estandarizaron los datos.
+
+**La agregación elegida no altera esa conclusión.** El promedio simple y el
+promedio ponderado por el coseno de la latitud —que corrige el hecho de que las
+celdas polares cubren mucho menos área que las ecuatoriales— tienen una
+correlación de **0.936**. Las dos curvas describen el mismo movimiento de fondo,
+de modo que la tendencia observada no es un artefacto de dar demasiado peso a las
+latitudes altas.
+
+**La media móvil de 12 meses confirma la tendencia y suaviza el ruido.** Se eligió
+una ventana de 12 porque los datos son mensuales y el ciclo esperado es anual: con
+ese ancho, la media móvil promedia exactamente un ciclo completo y por lo tanto
+cancela la estacionalidad, dejando a la vista el movimiento de largo plazo.
+
+**Los dos hemisferios no se comportan igual.** La serie del hemisferio norte se
+mantiene por encima de la del sur durante prácticamente todo el periodo. Este
+contraste es el que motiva separar el análisis estacional de la sección siguiente.
 """)
 
 # =============================================================================
@@ -1133,6 +1438,47 @@ else:
 display(Markdown(f"**Interpretación.** {veredicto}"))
 """)
 
+md(r"""
+### 17.1 Lectura de la estacionalidad
+
+El resultado de esta sección es, quizá, el más contraintuitivo del análisis y
+merece explicarse con cuidado.
+
+**En la serie global la estacionalidad es prácticamente inexistente.** La
+descomposición reparte la varianza así: tendencia 0.0162, residuo 0.0046 y
+componente estacional apenas **0.0007**, sobre una varianza total de 0.0255. Es
+decir, el ciclo anual explica alrededor del **3 %** de la variabilidad, mientras
+que la tendencia explica cerca del 64 %.
+
+**Esto no significa que el almacenamiento de agua no tenga ciclo anual.** La tabla
+del perfil mensual muestra por qué: en el hemisferio norte el promedio es positivo
+los doce meses (entre 0.091 en abril y 0.185 en junio), mientras que en el sur es
+negativo o cercano a cero casi todo el año (entre −0.105 en junio y 0.025 en
+enero). Los dos hemisferios tienen estaciones **opuestas**, de modo que al
+promediarlos en una sola serie global sus ciclos se cancelan parcialmente. A esto
+se suma el desbalance ya documentado: con el 80 % de las celdas en el norte, la
+serie global es en buena medida la serie del hemisferio norte.
+
+La lección metodológica es directa: **una serie agregada globalmente no es el
+objeto adecuado para estudiar la estacionalidad de este fenómeno**. La
+estacionalidad hay que buscarla por región, y en la sección 18 se confirma que
+existe y es sustancial a nivel de banda de latitud.
+
+**La serie no es estacionaria en media.** La prueba de Dickey-Fuller aumentada
+arroja un estadístico de −1.516 con p-value de **0.5257**, muy por encima de 0.05,
+por lo que no se rechaza la hipótesis nula de raíz unitaria. Este resultado es
+coherente con la tendencia descendente identificada en la sección 16: una serie
+con tendencia no es estacionaria. Para un modelo que lo requiera habrá que
+diferenciar la serie o incorporar la tendencia explícitamente, tal como se hizo en
+el ejemplo de series de tiempo visto en clase.
+
+> **Nota sobre la interpolación.** Para poder descomponer la serie fue necesario
+> rellenar los 22 meses ausentes, ya que `seasonal_decompose` no admite huecos. La
+> interpolación se usa **solo** para esta descomposición y no se propaga al resto
+> del análisis; conviene recordarlo al leer la componente de tendencia en esos
+> tramos.
+""")
+
 # =============================================================================
 # 18. Análisis espacial
 # =============================================================================
@@ -1190,13 +1536,13 @@ plt.show()
 """)
 
 code(r"""
-# Cobertura: qué fracción de meses tiene dato en cada celda.
+# Cobertura: cuántos de los meses observados tiene cada celda.
 cobertura_celda = (
-    df.groupby([COL_LAT, COL_LON], observed=True)[COL_OBJETIVO]
-      .apply(lambda s: s.notna().mean() * 100).reset_index()
+    df.groupby([COL_LAT, COL_LON], observed=True)
+      .size().rename("meses_con_dato").reset_index()
 )
-mapa(cobertura_celda, "Porcentaje de meses con dato disponible por celda",
-     "% de meses con dato", cmap="viridis", simetrico=False)
+mapa(cobertura_celda, f"Meses con dato por celda (de {df[COL_FECHA].nunique()} posibles)",
+     "Meses con dato", cmap="viridis", simetrico=False)
 guardar_figura("18_mapa_cobertura")
 plt.show()
 """)
@@ -1222,6 +1568,34 @@ resumen_banda = df.groupby("banda_latitud", observed=True)[COL_OBJETIVO].agg(
 )
 display(resumen_banda)
 resumen_banda.to_csv(TABLAS / "resumen_por_banda_latitud.csv")
+""")
+
+md(r"""
+### 18.1 Lectura del comportamiento espacial
+
+**El promedio global esconde diferencias regionales grandes y de signo opuesto.**
+La tabla por bandas de latitud lo muestra con claridad: la banda **tropical norte
+tiene la media más baja (−0.222)**, mientras que la **subtropical norte (0.327)** y
+la **polar norte (0.318)** tienen las más altas. Entre los extremos hay una
+diferencia de más de medio punto en la escala estandarizada, comparable a la mitad
+de una desviación estándar de la variable. Una única serie global promedia
+regiones que se comportan de forma distinta.
+
+**La variabilidad también es desigual.** Las bandas tropical norte, subtropical
+norte y polar norte tienen desviaciones menores (0.845 a 0.869) que las bandas del
+hemisferio sur (0.928 a 0.944). Los valores más extremos de todo el conjunto
+—mínimo −3.968 y máximo 4.057— se registran ambos en la banda tropical norte, que
+es a la vez la de menor media: es la región donde ocurren las anomalías más
+pronunciadas en ambos sentidos.
+
+**Los mapas confirman que la estructura espacial es coherente**, no ruido: las
+celdas vecinas presentan valores parecidos y se distinguen regiones continuas de
+valores altos y bajos. Esa continuidad espacial es información aprovechable para
+un modelo futuro.
+
+El mapa de cobertura, por su parte, muestra que las celdas con series incompletas
+no están repartidas al azar sino concentradas en zonas concretas, lo que refuerza
+la idea de que los faltantes de este conjunto son estructurales y no aleatorios.
 """)
 
 # =============================================================================
@@ -1289,6 +1663,93 @@ if COL_TWS is not None:
           .rename(f"corr({COL_TWS}, {COL_OBJETIVO})")
     )
     display(por_banda.to_frame().round(4))
+""")
+
+md(r"""
+### 19.1 La línea base de persistencia
+
+Si el almacenamiento de un mes predice bien el del mes siguiente, entonces la
+regla más simple posible —«mañana será como hoy»— ya es un pronóstico decente.
+Esa regla se llama **línea base de persistencia** y es la referencia contra la
+cual debe medirse cualquier modelo: un modelo que no la supere no aporta nada.
+
+Como la métrica del reto es el RMSE, se calcula aquí el RMSE que obtendría esa
+regla sobre el conjunto de entrenamiento.
+""")
+
+code(r"""
+if COL_TWS is not None:
+    error_persistencia = df[COL_OBJETIVO] - df[COL_TWS]
+    rmse_persistencia = np.sqrt((error_persistencia ** 2).mean())
+    mae_persistencia = error_persistencia.abs().mean()
+
+    print(f"RMSE de la persistencia : {rmse_persistencia:.4f}")
+    print(f"MAE  de la persistencia : {mae_persistencia:.4f}")
+    print(f"Desviación de {COL_OBJETIVO}   : {df[COL_OBJETIVO].std():.4f}")
+    print(f"\nEl error de la persistencia equivale al "
+          f"{rmse_persistencia / df[COL_OBJETIVO].std() * 100:.1f}% de la desviación "
+          f"estándar de la variable objetivo.")
+
+    fig, axes = plt.subplots(1, 2, figsize=(16, 5))
+    axes[0].hist(error_persistencia, bins=100)
+    axes[0].set(title="Error de la línea base de persistencia",
+                xlabel=f"{COL_OBJETIVO} - {COL_TWS}", ylabel="Frecuencia")
+
+    rmse_mensual = (
+        error_persistencia.groupby(df[COL_FECHA])
+        .apply(lambda e: np.sqrt((e ** 2).mean()))
+    )
+    axes[1].plot(rmse_mensual.index, rmse_mensual.values)
+    axes[1].set(title="RMSE de la persistencia mes a mes",
+                xlabel="Fecha", ylabel="RMSE")
+    plt.tight_layout()
+    guardar_figura("19_linea_base_persistencia")
+    plt.show()
+""")
+
+md(r"""
+### 19.2 Lectura de las asociaciones
+
+**La persistencia domina todo lo demás.** La correlación entre `TWS_t` y `target`
+es **0.803**, más del doble que la de cualquier otra variable. El agua almacenada
+tiene mucha inercia: el mejor predictor del mes siguiente es el mes actual. Esta
+asociación se mantiene alta en todas las regiones, entre **0.752** en la banda
+tropical norte y **0.824** en la templada norte, de modo que es una propiedad
+general del fenómeno y no de una zona particular.
+
+**El orden de los SPEI confirma la hipótesis planteada en la sección 2.6.** Las
+correlaciones con la variable objetivo se ordenan exactamente según la escala de
+acumulación:
+
+| Variable | Correlación con `target` |
+| --- | ---: |
+| `SPEI_12_t` | 0.380 |
+| `SPEI_06_t` | 0.368 |
+| `SOIL_MOISTURE_t` | 0.320 |
+| `SPEI_03_t` | 0.285 |
+| `SPEI_01_t` | 0.204 |
+
+Cuanto más largo es el periodo que acumula el índice, más se asocia con el
+almacenamiento total de agua. Es coherente con el argumento físico de que el TWS
+integra componentes de respuesta lenta —sobre todo agua subterránea— y por lo
+tanto refleja el balance acumulado de muchos meses, no la lluvia del mes en curso.
+Conviene subrayar que esto **se planteó como expectativa a verificar y los datos
+la respaldan**; no se dio por supuesto.
+
+**Las relaciones son esencialmente lineales.** Las correlaciones de Spearman
+difieren de las de Pearson en 0.024 como máximo. Si alguna asociación fuera
+fuertemente no lineal, el coeficiente por rangos sería bastante mayor que el de
+Pearson, y no es el caso.
+
+**La línea base a superar es exigente.** Predecir simplemente que el mes siguiente
+será igual al actual produce un **RMSE de 0.5724** y un MAE de 0.4045, equivalente
+al 62.8 % de la desviación estándar de la variable objetivo. Como la métrica del
+reto es justamente el RMSE, ese número es la referencia concreta: un modelo que no
+baje de 0.5724 no aporta nada sobre la regla trivial.
+
+> Todo lo anterior describe **asociaciones**. Que el SPEI a 12 meses se mueva junto
+> al almacenamiento del mes siguiente no demuestra que lo determine; ambos pueden
+> responder a un mismo balance hídrico de fondo.
 """)
 
 # =============================================================================
@@ -1373,6 +1834,32 @@ if COLS_SPEI:
     plt.show()
 """)
 
+md(r"""
+### 20.1 Lectura de los cruces
+
+**El cruce banda × mes revela la estacionalidad que la serie global ocultaba.** El
+mapa de calor muestra patrones mensuales definidos dentro de cada banda: la
+subtropical norte alcanza su máximo en junio (0.417) y su mínimo en abril (0.268);
+la tropical norte, que es la banda más seca en promedio, tiene su mínimo en
+febrero (−0.260) y su máximo en mayo (−0.191). Es decir, **el ciclo anual existe y
+es apreciable a nivel regional**, pero se cancela al promediar el planeta entero,
+tal como se argumentó en la sección 17.
+
+**La categoría de sequía del mes actual ordena el almacenamiento del mes
+siguiente de forma monótona.** La media de `target` crece sin excepción a lo largo
+de las siete categorías: −0.285 en sequía extrema, −0.248 en severa, −0.117 en
+moderada, 0.116 en normal, 0.337 en húmedo moderado, 0.467 en húmedo severo y
+0.602 en húmedo extremo. Que la relación sea monótona en toda la escala refuerza
+la utilidad del SPEI como covariable, aunque la dispersión dentro de cada
+categoría siga siendo alta (desviaciones entre 0.888 y 0.930), señal de que el
+SPEI por sí solo está lejos de determinar el resultado.
+
+**Los gráficos de dispersión confirman visualmente lo que dicen las
+correlaciones.** La nube de `TWS_t` frente a `target` se agrupa de forma estrecha
+alrededor de la diagonal, mientras que las de los SPEI y la humedad del suelo
+frente al objetivo son mucho más difusas.
+""")
+
 # =============================================================================
 # 21. Hallazgos principales
 # =============================================================================
@@ -1408,19 +1895,168 @@ display(tabla_resumen)
 tabla_resumen.to_csv(TABLAS / "resumen_hallazgos.csv")
 """)
 
+md(r"""
+### Los ocho hallazgos del análisis
+
+**1. El conjunto no tiene valores nulos ni duplicados, pero sí faltantes
+estructurales importantes.** Las 13 columnas están completas en las 2 154 021
+filas y no hay identificadores repetidos. Sin embargo, del periodo 2002-05 a
+2015-08 faltan **22 de los 160 meses del calendario (13.8 %)**, meses en los que no
+existe ninguna fila. El formato plano —una fila por combinación observada— hace que
+un mes no observado desaparezca en lugar de aparecer como `NaN`, y por eso el
+conteo de nulos no lo detecta.
+*Evidencia: tabla de calidad y lista de meses ausentes, sección 10.*
+
+**2. Los meses ausentes se concentran al inicio y al final del periodo.** Los años
+2004 a 2010 están completos, mientras que 2011 a 2014 pierden entre 4 y 5 meses
+cada uno y 2002 pierde 3. El patrón es coherente con el deterioro progresivo de la
+misión GRACE en sus últimos años de operación, aunque esa atribución proviene de
+literatura externa y no puede verificarse con este archivo.
+*Evidencia: tabla de cobertura anual y figura `10_cobertura_temporal`.*
+
+**3. La variable objetivo es el almacenamiento del mes calendario `t+1`, no el del
+siguiente mes disponible.** La comprobación celda por celda muestra coincidencia
+en 1 977 398 filas cuando el salto al registro siguiente es exactamente de un mes,
+y **ninguna coincidencia** cuando el salto es mayor. Para las filas cuyo `t+1` cae
+en un mes ausente, `target` es la única información existente sobre ese mes.
+*Evidencia: tabla de saltos temporales, sección 11.1.*
+
+**4. Las variables están estandarizadas y son adimensionales.** Todas tienen media
+próxima a cero y desviación próxima a uno (`target`: media 0.113, desviación
+0.912), con distribuciones casi simétricas (asimetrías entre −0.14 y 0.09). No
+están en centímetros de lámina de agua, de modo que **no admiten lectura como
+volumen físico**.
+*Evidencia: tabla de estadística descriptiva, sección 12.*
+
+**5. Hay una tendencia descendente sostenida.** El promedio anual de `target` cae
+de 0.322 en 2004 a −0.136 en 2015, y la prueba de Dickey-Fuller no permite
+rechazar la raíz unitaria (p = 0.526): la serie **no es estacionaria en media**. La
+descomposición atribuye a la tendencia el 64 % de la varianza. El resultado se
+sostiene tanto con promedio simple como ponderado por área (correlación 0.936).
+*Evidencia: promedios anuales, figura `16_media_movil`, descomposición y prueba ADF.*
+
+**6. La estacionalidad desaparece al agregar globalmente, pero existe a nivel
+regional.** La componente estacional explica solo el 3 % de la varianza de la serie
+global. La causa es que los hemisferios tienen ciclos opuestos —el norte promedia
+positivo los doce meses, el sur negativo o nulo— y se cancelan al promediarse. El
+cruce banda × mes muestra ciclos mensuales definidos dentro de cada región.
+*Evidencia: perfil estacional por hemisferio, descomposición y figura `20_cruce_banda_mes`.*
+
+**7. El conjunto está fuertemente desbalanceado en el espacio, y las regiones se
+comportan de forma distinta.** El 80.3 % de las observaciones corresponde al
+hemisferio norte y la banda polar sur no tiene ninguna. La banda tropical norte es
+la de menor media (−0.222) y a la vez donde se registran el mínimo y el máximo
+absolutos del conjunto; las bandas subtropical y polar norte son las de mayor media
+(0.327 y 0.318).
+*Evidencia: tablas de frecuencia por banda y hemisferio, y resumen por banda.*
+
+**8. La persistencia domina, y entre las covariables mandan las escalas largas del
+SPEI.** La correlación entre `TWS_t` y `target` es 0.803, frente a 0.380 del
+`SPEI_12_t`, 0.368 del `SPEI_06_t`, 0.320 de la humedad del suelo, 0.285 del
+`SPEI_03_t` y 0.204 del `SPEI_01_t`. El orden por escala de acumulación es exacto y
+confirma la expectativa planteada al inicio. La línea base de persistencia obtiene
+**RMSE 0.5724**, la referencia que cualquier modelo debe superar.
+*Evidencia: matriz de correlación, comparación Pearson-Spearman y sección 19.2.*
+""")
+
 # =============================================================================
 # 22. Conclusiones y 23. Próximos pasos
 # =============================================================================
 md(r"""
 ## 22. Conclusiones
 
-*(Esta sección se redacta a partir de los resultados obtenidos al ejecutar el
-cuaderno con los datos reales; cada conclusión se conecta con el objetivo
-específico correspondiente de la sección 5.2.)*
+Las conclusiones se organizan siguiendo los seis objetivos específicos planteados
+en la sección 5.2, de modo que pueda verificarse que cada uno quedó cubierto.
+
+**Objetivo 1 — Describir la estructura del conjunto.** El archivo de entrenamiento
+contiene 2 154 021 observaciones y 13 variables, y el de prueba 280 961
+observaciones. Los datos vienen en formato plano, con una fila por combinación de
+mes y celda, sobre una rejilla global de **1° de resolución con 15 715 celdas**
+que cubre de −55.5° a 83.5° de latitud. El periodo de entrenamiento va de mayo de
+2002 a agosto de 2015. Las variables se clasificaron en identificador
+(`sample_id`), temporal (`time`), geográficas (`lat`, `lon`), satelital (`TWS_t`),
+climáticas (`SPEI_01_t` a `SPEI_12_t` y `SOIL_MOISTURE_t`), codificación temporal
+ya provista (`month_sin`, `month_cos`) y objetivo (`target`).
+
+**Objetivo 2 — Evaluar la calidad de los datos.** No hay valores nulos, ni filas
+duplicadas, ni identificadores repetidos. El problema de calidad real es de otra
+naturaleza: **faltan 22 meses completos del calendario** y el 0.68 % de las
+combinaciones celda-mes. Los valores atípicos por IQR son escasos en la variable
+objetivo (0.25 %) y más frecuentes en la humedad del suelo (2.58 %); se
+documentaron y **no se eliminaron**, porque se agrupan en años y regiones
+concretos, lo que apunta a eventos hidrológicos reales y no a errores.
+
+**Objetivo 3 — Analizar el comportamiento temporal.** La serie presenta una
+tendencia descendente sostenida y no es estacionaria en media (Dickey-Fuller,
+p = 0.526). La descomposición atribuye el 64 % de la varianza a la tendencia y
+solo el 3 % al ciclo anual.
+
+**Objetivo 4 — Comparar entre ubicaciones geográficas.** Las regiones no se
+comportan igual: la banda tropical norte promedia −0.222 mientras que la
+subtropical norte promedia 0.327. Más importante aún, el análisis por hemisferio
+explicó por qué la estacionalidad parecía ausente: los ciclos opuestos del norte y
+del sur se cancelan al promediarse. **El promedio global no es representativo del
+comportamiento local.**
+
+**Objetivo 5 — Determinar el grado de asociación.** La variable más asociada con
+el objetivo es el propio almacenamiento del mes actual (r = 0.803). Entre las
+covariables, el orden sigue exactamente la escala de acumulación del SPEI, de 0.380
+para 12 meses a 0.204 para 1 mes. Las relaciones son esencialmente lineales, ya
+que Pearson y Spearman difieren en 0.024 como máximo.
+
+**Objetivo 6 — Identificar variables candidatas para el modelado.** Se recogen en
+la sección 23.
+
+### Limitaciones del conjunto
+
+Conviene ser explícito sobre lo que estos datos **no** permiten:
+
+- Al estar estandarizadas, las variables no admiten interpretación en unidades
+  físicas de volumen o de lámina de agua.
+- La resolución de 1° describe escalas de cientos de kilómetros; no permite
+  conclusiones sobre cuencas pequeñas ni sobre puntos concretos.
+- El desbalance hemisférico (80 % / 20 %) hace que cualquier métrica global esté
+  dominada por el hemisferio norte.
+- El análisis es **descriptivo y asociativo**. En ningún punto se establece
+  causalidad, y las correlaciones halladas no deben leerse en ese sentido.
+- Los 22 meses ausentes limitan lo que puede afirmarse sobre continuidad temporal
+  en 2002-2003 y 2011-2014.
 
 ## 23. Próximos pasos
 
-*(Se completa junto con las conclusiones.)*
+**1. Partir de la persistencia como línea base.** Cualquier modelo debe compararse
+contra el RMSE de 0.5724 obtenido por la regla trivial. Es la primera métrica que
+debe reportarse.
+
+**2. Construir variables de rezago con cuidado.** El almacenamiento del mes actual
+es la variable más informativa, así que los rezagos de `TWS_t` y sus diferencias
+son candidatos naturales. Es indispensable **respetar los 22 meses ausentes**: un
+`shift()` sobre el índice de filas produciría rezagos falsos, porque el registro
+anterior de una celda no siempre corresponde al mes anterior.
+
+**3. Incorporar la dimensión regional.** Dado que el comportamiento difiere por
+banda de latitud y por hemisferio, conviene evaluar modelos que reciban esa
+información o que se entrenen por región, y **validar por regiones además de
+globalmente**. Cabe señalar que el material de la organización advierte que
+latitud y longitud no deberían usarse directamente como variables predictoras.
+
+**4. Tratar la tendencia explícitamente.** La serie no es estacionaria. Según el
+modelo que se elija, habrá que diferenciar, incluir un término de tendencia o
+trabajar sobre residuos, tal como se hizo en el ejemplo de series de tiempo del
+curso.
+
+**5. Priorizar las escalas largas del SPEI.** `SPEI_12_t` y `SPEI_06_t` son las
+covariables con mayor asociación y deberían entrar antes que `SPEI_01_t`.
+
+**6. Validar respetando el orden temporal.** La partición debe ser cronológica,
+nunca aleatoria: una partición al azar dejaría meses futuros en el entrenamiento y
+produciría una estimación optimista del error.
+
+**7. Manejar el enmascaramiento del conjunto de prueba.** El 66.53 % de las filas
+de prueba tiene `TWS_t` enmascarado a propósito. Como esa es justamente la
+variable más predictiva, el modelo debe funcionar sin ella en dos tercios de los
+casos, y esa condición debe reproducirse durante la validación para no
+sobreestimar el desempeño.
 
 ## Referencias
 

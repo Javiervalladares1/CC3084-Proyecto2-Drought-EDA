@@ -1,0 +1,14 @@
+Variable,Tipo,Valores faltantes,% faltantes,Valores únicos,Descripción
+sample_id,str,0,0.0,2154021,Identificador único del registro (combina fecha y coordenadas).
+time,datetime64[us],0,0.0,138,Mes de observación (variable temporal del registro).
+lat,float32,0,0.0,140,"Latitud del centro de la celda de la rejilla, en grados."
+lon,float32,0,0.0,358,"Longitud del centro de la celda de la rejilla, en grados."
+TWS_t,float32,0,0.0,2119538,Almacenamiento total de agua del mes t (anomalía derivada de GRACE/GRACE-FO).
+SPEI_01_t,float32,0,0.0,2117866,Índice SPEI acumulado a 1 mes: déficit o exceso hídrico estandarizado.
+SPEI_03_t,float32,0,0.0,2117747,Índice SPEI acumulado a 3 meses: déficit o exceso hídrico estandarizado.
+SPEI_06_t,float32,0,0.0,2118182,Índice SPEI acumulado a 6 meses: déficit o exceso hídrico estandarizado.
+SPEI_12_t,float32,0,0.0,2118442,Índice SPEI acumulado a 12 meses: déficit o exceso hídrico estandarizado.
+SOIL_MOISTURE_t,float32,0,0.0,2101205,Humedad del suelo cercana a la superficie en el mes t.
+month_sin,float32,0,0.0,8,"Codificación cíclica del mes del año, ya incluida por la organización del reto (seno y coseno del ángulo del mes)."
+month_cos,float32,0,0.0,8,"Codificación cíclica del mes del año, ya incluida por la organización del reto (seno y coseno del ángulo del mes)."
+target,float32,0,0.0,2119440,Variable objetivo: almacenamiento total de agua del mes t+1.

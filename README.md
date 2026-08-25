@@ -71,8 +71,15 @@ Los archivos del reto **no se versionan** en este repositorio por su tamaño
 | `Test.csv`             |       32.8 MB |     280 961 |
 | `SampleSubmission.csv` |        5.8 MB |           — |
 
-Las instrucciones detalladas de descarga están en
+Para el análisis exploratorio bastan `Train.csv` y `Test.csv`. Las instrucciones
+detalladas de descarga y la lista completa de columnas verificadas están en
 [`data/raw/README.md`](data/raw/README.md).
+
+**Estructura verificada:** formato plano con una fila por combinación de mes y
+celda, sobre una rejilla global de **1°** con **15 715 celdas** (latitudes de
+−55.5° a 83.5°), y un periodo de entrenamiento de **mayo 2002 a agosto 2015**.
+Todas las variables numéricas están **estandarizadas y son adimensionales**: no
+están en centímetros de lámina de agua.
 
 Los archivos crudos son de **solo lectura**: nunca se modifican. Todo producto
 derivado se escribe en `data/processed/`.
@@ -93,8 +100,13 @@ Proyecto2/
 ├── scripts/
 │   ├── inspeccionar_datos.py    Auditoría inicial de los archivos crudos
 │   ├── construir_notebook.py    Genera el notebook principal
-│   └── ejecutar_notebook.py     Ejecuta el notebook y verifica reproducibilidad
-├── docs/                   Informe y material de la presentación
+│   ├── ejecutar_notebook.py     Ejecuta el notebook y verifica reproducibilidad
+│   └── crear_presentacion.py    Genera la presentación desde las figuras
+├── docs/
+│   ├── Informe_Analisis_Exploratorio.pdf    Informe final (entregable)
+│   ├── Informe_Analisis_Exploratorio.md     Fuente del informe
+│   ├── Proyecto2_Presentacion.pptx          Presentación (entregable)
+│   └── Presentacion_Contenido.md            Guion de la presentación
 └── *.ipynb                 Ejemplos de clase (referencia metodológica, sin modificar)
 ```
 
@@ -145,7 +157,27 @@ desde ahí.
   relevantes.
 - Hallazgos, conclusiones y próximos pasos hacia la etapa de modelado.
 
-> El estado de avance de cada sección está indicado dentro del propio notebook.
+## Principales hallazgos
+
+1. **Sin nulos ni duplicados, pero con faltantes estructurales.** Las 13 columnas
+   están completas, pero faltan **22 de los 160 meses** del calendario (13.8 %),
+   concentrados en 2002–2003 y 2011–2014. El formato plano hace que un mes no
+   observado no genere filas en vez de generar `NaN`.
+2. **`target` es el TWS del mes calendario `t+1`**, no el del siguiente mes
+   disponible; se verificó celda por celda.
+3. **Las variables están estandarizadas**; no admiten lectura como volumen físico.
+4. **Hay tendencia descendente** (el promedio anual cae de 0.322 en 2004 a −0.136
+   en 2015) y la serie **no es estacionaria** (Dickey-Fuller, p = 0.526).
+5. **La estacionalidad se cancela al agregar globalmente** porque los hemisferios
+   tienen ciclos opuestos, pero existe a nivel regional.
+6. **Fuerte desbalance espacial**: 80.3 % de las observaciones en el hemisferio
+   norte; las medias por banda van de −0.222 a 0.327.
+7. **La persistencia domina** (r = 0.803) y las escalas largas del SPEI se asocian
+   más que las cortas, en orden exacto por periodo de acumulación.
+8. **Línea base a superar: RMSE 0.5724.**
+
+El detalle, con las tablas y figuras que respaldan cada punto, está en el notebook
+y en el informe.
 
 ## Integrantes
 

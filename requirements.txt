@@ -20,3 +20,6 @@ jupyter>=1.0
 ipykernel>=6.29
 nbformat>=5.10
 nbclient>=0.10
+
+# --- Generación de la presentación (scripts/crear_presentacion.py) ----------
+python-pptx>=1.0

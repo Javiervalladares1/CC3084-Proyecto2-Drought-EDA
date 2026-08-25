@@ -1,0 +1,14 @@
+Indicador,Valor
+Observaciones en train,"2,154,021"
+Observaciones en test,"280,961"
+Variables en train,13
+Rango temporal,2002-05-01 a 2015-08-01
+Meses cubiertos,138
+Celdas de la rejilla,"15,715"
+Faltantes en la variable objetivo,0.00%
+Duplicados exactos,0
+Media de target,0.1125
+Desviación de target,0.9120
+Atípicos por IQR en la objetivo,0.25%
+p-value Dickey-Fuller,0.52568
+"corr(TWS_t, target)",0.8033
