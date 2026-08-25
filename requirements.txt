@@ -1,0 +1,22 @@
+# Proyecto 2 - Análisis Exploratorio (CC3084 Data Science)
+# Reto: A Step Ahead of Drought: Forecasting Global Water Storage (ITU / Zindi)
+#
+# Instalación:  python3 -m pip install -r requirements.txt
+# Probado con Python 3.11 - 3.13
+
+# --- Núcleo del análisis (las mismas librerías de los ejemplos de clase) -----
+pandas>=2.2
+numpy>=1.26
+matplotlib>=3.8
+seaborn>=0.13
+
+# --- Series de tiempo: descomposición estacional y prueba de Dickey-Fuller ---
+# (usadas en "Ejemplo series de tiempo LSTM.ipynb")
+statsmodels>=0.14
+scipy>=1.11
+
+# --- Ejecución del notebook --------------------------------------------------
+jupyter>=1.0
+ipykernel>=6.29
+nbformat>=5.10
+nbclient>=0.10
