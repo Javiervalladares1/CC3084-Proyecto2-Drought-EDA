@@ -9,6 +9,10 @@ Reto organizado por la *International Telecommunication Union* (ITU) junto con
 agencias del Sistema de Naciones Unidas, alojado en Zindi:
 <https://zindi.world/competitions/one-step-ahead-of-drought-forecasting-global-water-storage-challenge>
 
+## Repositorio
+
+<https://github.com/Javiervalladares1/CC3084-Proyecto2-Drought-EDA>
+
 ## Curso
 
 CC3084 – Data Science
@@ -101,7 +105,8 @@ Proyecto2/
 │   ├── inspeccionar_datos.py    Auditoría inicial de los archivos crudos
 │   ├── construir_notebook.py    Genera el notebook principal
 │   ├── ejecutar_notebook.py     Ejecuta el notebook y verifica reproducibilidad
-│   └── crear_presentacion.py    Genera la presentación desde las figuras
+│   ├── crear_presentacion.py    Genera la presentación desde las figuras
+│   └── verificar_rubrica.py     Comprueba la cobertura de la rúbrica del curso
 ├── docs/
 │   ├── Informe_Analisis_Exploratorio.pdf    Informe final (entregable)
 │   ├── Informe_Analisis_Exploratorio.md     Fuente del informe
@@ -138,6 +143,17 @@ python3 scripts/ejecutar_notebook.py
 
 El notebook usa **rutas relativas** a la raíz del repositorio y debe ejecutarse
 desde ahí.
+
+Para comprobar que el análisis cubre todos los criterios de evaluación del curso:
+
+```bash
+python3 scripts/verificar_rubrica.py
+```
+
+El script revisa las secciones y técnicas exigidas por la guía, tres salvaguardas
+metodológicas (que no se afirme causalidad, que los valores atípicos no se hayan
+eliminado y que las limitaciones estén declaradas) y que todas las celdas del
+notebook tengan salida. Devuelve código de salida distinto de cero si algo falta.
 
 ## Principales análisis realizados
 

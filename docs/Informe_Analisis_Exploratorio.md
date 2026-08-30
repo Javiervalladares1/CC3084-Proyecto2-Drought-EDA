@@ -24,7 +24,10 @@ patrones que permitirán, en una fase posterior, plantear un modelo con criterio
 
 Todo el análisis es reproducible: el cuaderno `Proyecto2_Analisis_Exploratorio.ipynb`
 se ejecuta de principio a fin sin errores y genera las tablas y figuras que aquí
-se citan. A lo largo del documento se distingue explícitamente entre lo que se
+se citan. El código, el notebook ejecutado y los entregables están versionados en:
+
+> **https://github.com/Javiervalladares1/CC3084-Proyecto2-Drought-EDA**
+ A lo largo del documento se distingue explícitamente entre lo que se
 observa en los datos y la información tomada de fuentes externas.
 
 # 2. Situación problemática

@@ -90,6 +90,7 @@ for texto, tam, color in [
     ("Proyecto 2 — Análisis Exploratorio", 20, GRIS),
     ("CC3084 Data Science · Universidad del Valle de Guatemala · Semestre II 2026", 15, GRIS),
     ("Integrantes: ______________________", 14, GRIS),
+    ("https://github.com/Javiervalladares1/CC3084-Proyecto2-Drought-EDA", 12, TEAL),
 ]:
     q = tf.add_paragraph(); q.text = texto
     q.font.size = Pt(tam); q.font.color.rgb = color
