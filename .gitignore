@@ -28,3 +28,7 @@ __pycache__/
 # --- Temporales --------------------------------------------------------------
 tmp/
 *.log
+
+# --- Carpeta de entrega ------------------------------------------------------
+# Se reconstruye con scripts/preparar_entrega.py; versionarla duplicaria todo.
+repo/
