@@ -5,10 +5,54 @@ author: "CC3084 — Data Science · Universidad del Valle de Guatemala · Semest
 lang: es
 geometry: margin=2.5cm
 fontsize: 11pt
-toc: true
 ---
 
-\newpage
+**Integrantes**
+
+| # | Nombre | Carné |
+| :-: | ------------------------------- | ---------- |
+| 1 |  |  |
+| 2 |  |  |
+| 3 |  |  |
+| 4 |  |  |
+
+**Repositorio:** <https://github.com/Javiervalladares1/CC3084-Proyecto2-Drought-EDA>
+
+```{=openxml}
+<w:p><w:r><w:br w:type="page"/></w:r></w:p>
+```
+
+## Contenido
+
+1. Introducción
+2. Situación problemática
+3. Problema científico
+4. Objetivos
+    - 4.1 Objetivo general
+    - 4.2 Objetivos específicos
+5. Contexto e investigación previa
+    - 5.1 Qué es el Total Water Storage
+    - 5.2 El SPEI
+6. Descripción de los datos
+    - 6.1 Variables
+    - 6.2 Verificación de la variable objetivo
+7. Limpieza y preprocesamiento
+8. Análisis exploratorio
+    - 8.1 Los faltantes están en el calendario, no en las celdas
+    - 8.2 Distribuciones y estadística descriptiva
+    - 8.3 Valores atípicos
+    - 8.4 Comportamiento temporal y estacionalidad
+    - 8.5 Análisis espacial
+    - 8.6 Correlaciones
+    - 8.7 Categorías de sequía
+9. Hallazgos
+10. Conclusiones
+11. Próximos pasos
+12. Referencias
+
+```{=openxml}
+<w:p><w:r><w:br w:type="page"/></w:r></w:p>
+```
 
 # 1. Introducción
 
@@ -26,9 +70,10 @@ Todo el análisis es reproducible: el cuaderno `Proyecto2_Analisis_Exploratorio.
 se ejecuta de principio a fin sin errores y genera las tablas y figuras que aquí
 se citan. El código, el notebook ejecutado y los entregables están versionados en:
 
-> **https://github.com/Javiervalladares1/CC3084-Proyecto2-Drought-EDA**
- A lo largo del documento se distingue explícitamente entre lo que se
-observa en los datos y la información tomada de fuentes externas.
+> **<https://github.com/Javiervalladares1/CC3084-Proyecto2-Drought-EDA>**
+
+A lo largo del documento se distingue explícitamente entre lo que se observa en
+los datos y la información tomada de fuentes externas.
 
 # 2. Situación problemática
 

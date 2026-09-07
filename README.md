@@ -106,6 +106,7 @@ Proyecto2/
 │   ├── construir_notebook.py    Genera el notebook principal
 │   ├── ejecutar_notebook.py     Ejecuta el notebook y verifica reproducibilidad
 │   ├── crear_presentacion.py    Genera la presentación desde las figuras
+│   ├── crear_informe.py         Genera el informe en .docx y .pdf
 │   └── verificar_rubrica.py     Comprueba la cobertura de la rúbrica del curso
 ├── docs/
 │   ├── Informe_Analisis_Exploratorio.pdf    Informe final (entregable)

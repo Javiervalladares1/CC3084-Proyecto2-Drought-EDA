@@ -19,6 +19,8 @@ __pycache__/
 
 # --- Sistema operativo -------------------------------------------------------
 .DS_Store
+# Archivos de bloqueo que crean Word y PowerPoint al abrir un documento
+~$*
 ._*
 .Spotlight-V100
 .Trashes
