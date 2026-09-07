@@ -107,7 +107,8 @@ Proyecto2/
 │   ├── ejecutar_notebook.py     Ejecuta el notebook y verifica reproducibilidad
 │   ├── crear_presentacion.py    Genera la presentación desde las figuras
 │   ├── crear_informe.py         Genera el informe en .docx y .pdf
-│   └── verificar_rubrica.py     Comprueba la cobertura de la rúbrica del curso
+│   ├── verificar_rubrica.py     Comprueba la cobertura de la rúbrica del curso
+│   └── preparar_entrega.py      Arma la carpeta repo/ con lo que se entrega
 ├── docs/
 │   ├── Informe_Analisis_Exploratorio.pdf    Informe final (entregable)
 │   ├── Informe_Analisis_Exploratorio.md     Fuente del informe
@@ -155,6 +156,25 @@ El script revisa las secciones y técnicas exigidas por la guía, tres salvaguar
 metodológicas (que no se afirme causalidad, que los valores atípicos no se hayan
 eliminado y que las limitaciones estén declaradas) y que todas las celdas del
 notebook tengan salida. Devuelve código de salida distinto de cero si algo falta.
+
+## Carpeta de entrega
+
+Para reunir en un solo lugar lo que se entrega del proyecto:
+
+```bash
+python3 scripts/preparar_entrega.py
+```
+
+Crea la carpeta `repo/` con el notebook ejecutado, los siete scripts, el informe
+en `.docx` y `.pdf`, la presentación, las figuras y las tablas del análisis.
+
+Quedan fuera a propósito los notebooks de ejemplo del curso y el PDF del
+enunciado: son material de referencia, no obra del grupo. Los datos del reto ya
+están excluidos por su tamaño.
+
+`repo/` es un artefacto que se reconstruye desde cero en cada ejecución, por eso
+no se versiona. El script comprueba además que el notebook copiado conserve sus
+salidas y avisa si hay cambios sin commitear que quedarían fuera de la copia.
 
 ## Principales análisis realizados
 
