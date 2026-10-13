@@ -1,0 +1,59 @@
+{
+  "configuration": {
+    "name": "RF_1",
+    "n_estimators": 180,
+    "max_depth": 18,
+    "min_samples_leaf": 30,
+    "max_features": 0.8,
+    "max_samples": 250000
+  },
+  "tuning": {
+    "family": "random_forest",
+    "name": "RF_1",
+    "stage": "tuning",
+    "parameters": {
+      "n_estimators": 180,
+      "max_depth": 18,
+      "min_samples_leaf": 30,
+      "max_features": 0.8,
+      "max_samples": 250000
+    },
+    "fit_seconds": 251.7161843329959,
+    "peak_rss_mb": 2082.65625,
+    "train_rows": 1529620,
+    "train_target_end": "2010-12-01",
+    "training_diagnostic_sample": {
+      "n": 20000,
+      "rmse": 0.4740861594417022,
+      "mae": 0.342076958358891,
+      "r2": 0.7398356713046628,
+      "bias": -0.0024267846791793998
+    },
+    "predict_seconds": 0.5034991249995073,
+    "validation": {
+      "n": 249667,
+      "rmse": 0.566346130085047,
+      "mae": 0.4255943091439186,
+      "r2": 0.6094603006501544,
+      "bias": 0.009266601364821011
+    },
+    "groups": {
+      "False": {
+        "n": 94081,
+        "rmse": 0.5201994897677901,
+        "mae": 0.38766388765273524,
+        "r2": 0.671078181316632,
+        "bias": 0.01528736266798054
+      },
+      "True": {
+        "n": 155586,
+        "rmse": 0.5925092906255952,
+        "mae": 0.4485303829829018,
+        "r2": 0.5720836329494843,
+        "bias": 0.00562591875737207
+      }
+    },
+    "inference_ms_per_1000": 2.967304199410137,
+    "model_bytes": 44576844
+  }
+}
