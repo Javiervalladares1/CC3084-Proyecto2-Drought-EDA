@@ -1,0 +1,21 @@
+family,group,importance
+random_forest,Disponibilidad,0.014112181752589274
+random_forest,Estacionalidad,0.02864455956274116
+random_forest,Humedad del suelo,0.06094053195655115
+random_forest,SPEI 01 meses,0.06644755857317958
+random_forest,SPEI 03 meses,0.05981722152372623
+random_forest,SPEI 06 meses,0.12511472566020213
+random_forest,SPEI 12 meses,0.036418991193902364
+random_forest,TWS e historia,0.4146568177809455
+random_forest,Tiempo transcurrido,0.06016706720367152
+random_forest,Ubicación,0.13368034479249136
+xgboost,Disponibilidad,0.1336051793769002
+xgboost,Estacionalidad,0.02643198613077402
+xgboost,Humedad del suelo,0.06837063422426581
+xgboost,SPEI 01 meses,0.09445238276384771
+xgboost,SPEI 03 meses,0.09405607404187322
+xgboost,SPEI 06 meses,0.13178829196840525
+xgboost,SPEI 12 meses,0.05115400208160281
+xgboost,TWS e historia,0.3426718357950449
+xgboost,Tiempo transcurrido,0.01769902929663658
+xgboost,Ubicación,0.03977061063051224
