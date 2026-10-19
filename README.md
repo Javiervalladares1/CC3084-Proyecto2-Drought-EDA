@@ -1,3 +1,57 @@
+# Proyecto 2 Pronóstico del almacenamiento de agua
+
+La parte 2 compara **Random Forest, XGBoost y redes LSTM**, en ese orden, con entrenamiento real, validación temporal, nueve configuraciones y una prueba reservada. Incluye una aplicación para explorar datos, ingresar observaciones o CSV y consultar u ocultar rendimiento.
+
+| Modelo | RMSE de prueba | MAE | R² |
+|---|---:|---:|---:|
+| Random Forest | 0.7162 | 0.5290 | 0.2837 |
+| XGBoost | 0.7035 | 0.5208 | 0.3088 |
+| LSTM | 0.6989 | 0.5186 | 0.3179 |
+| Persistencia causal | 0.8486 | — | — |
+
+**XGBoost se seleccionó con validación de 2013 antes de abrir la prueba.** La LSTM tuvo el menor RMSE final descriptivo, pero el intervalo temporal de su diferencia frente a XGBoost incluye cero. La prueba contiene 265 447 filas de 17 meses observados, con objetivos de enero de 2014 a septiembre de 2015. Test.csv no tiene etiquetas; sus 280 961 pronósticos por modelo no son una medida comprobable de precisión.
+
+## Entregables de la parte 2
+
+- [Plan ejecutado](docs/PLAN_PARTE2.md).
+- [Informe final editable](output/word/Informe_Final_Parte2_TWS.docx) y [PDF](output/pdf/Informe_Final_Parte2_TWS.pdf), con texto negro y referencias APA.
+- [Presentación de resultados](output/presentacion/Proyecto2_Resultados_TWS_Final.pptx).
+- [Notebook ejecutado](Proyecto2_Resultados.ipynb) y [guía de ejecución](docs/GUIA_PARTE2.md).
+- [Aplicación](app.py), [configuración](config/modelado.json), [código](src/tws/) y [pruebas](tests/).
+- [Métricas y manifiestos](outputs/modelado/), [figuras estáticas](figures/resultados/) y [verificación de entrega](docs/VERIFICACION_PARTE2.md).
+
+Los pesos entrenados, la historia observable y las predicciones completas se distribuyen en el paquete local de entrega. No se versionan archivos de datos ni pesos grandes. El código permite reproducirlos con los CSV originales de Zindi. Los artefactos de la primera etapa se conservan.
+
+## Inicio rápido con el paquete de entrega
+
+Se probó con Python 3.12.14. En macOS conviene crear el entorno fuera de una carpeta sincronizada con iCloud para evitar demoras de lectura.
+
+```bash
+python3 -m venv ~/.cache/proyecto2-tws-env
+source ~/.cache/proyecto2-tws-env/bin/activate
+python -m pip install -r requirements-modelado.lock.txt
+python -m streamlit run app.py
+```
+
+Abra http://127.0.0.1:8501/. El paquete incluye la historia observable y los tres modelos de producción, por lo que la aplicación no necesita descargar los CSV originales para pronosticar.
+
+## Reentrenar desde el repositorio
+
+Descargue `Train.csv` y `Test.csv` del reto oficial, colóquelos en `data/raw/` y ejecute:
+
+```bash
+python scripts/entrenar_modelos.py --stage all --family all
+python scripts/analizar_resultados.py
+python scripts/preparar_datos_aplicacion.py
+python scripts/generar_notebook_resultados.py
+python -m pytest -q
+python -m streamlit run app.py
+```
+
+El entrenamiento aísla cada familia en un proceso. La inferencia también utiliza procesos separados para evitar conflictos de bibliotecas nativas en macOS. Las ventanas respetan meses calendario y no rellenan TWS con etiquetas ni datos futuros. El entrenamiento puede reanudarse desde sus checkpoints.
+
+---
+
 # Proyecto 2 – Análisis Exploratorio
 
 ## Tema

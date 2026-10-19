@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-13",
+  "pytest": {
+    "passed": 18,
+    "seconds": 14.07,
+    "context": "entrega portátil sin CSV originales ni cachés"
+  },
+  "word": {
+    "pages": 31,
+    "text_colors": [
+      "000000"
+    ],
+    "figures": 16,
+    "all_pages_visually_reviewed": true
+  },
+  "pdf": {
+    "pages": 31,
+    "exported_from_reviewed_word": true
+  },
+  "notebook": {
+    "executed_code_cells": 12,
+    "errors": 0
+  },
+  "presentation": {
+    "slides": 16,
+    "native_charts": 6,
+    "native_tables": 4,
+    "embedded_chart_workbooks": 6,
+    "all_slides_visually_reviewed": true,
+    "roundtrip_pixel_identical": true
+  },
+  "browser": {
+    "form_prediction": true,
+    "csv_prediction": true,
+    "single_model": true,
+    "all_models": true,
+    "hide_show_metrics": true,
+    "csv_download": true,
+    "responsive_widths": [
+      637,
+      1440
+    ]
+  },
+  "google_drive_link": "pending_real_group_link"
+}
