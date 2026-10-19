@@ -1,0 +1,52 @@
+{
+  "repetitions": 2000,
+  "block_length_observed_months": 3,
+  "observed_months": 17,
+  "method": "Bootstrap circular de bloques temporales de meses observados; celdas del mismo mes se mantienen juntas",
+  "intervals": [
+    {
+      "family": "random_forest",
+      "algorithm": "Random Forest",
+      "rmse_low": 0.6015539011202159,
+      "rmse_high": 0.8237035121609533
+    },
+    {
+      "family": "xgboost",
+      "algorithm": "XGBoost",
+      "rmse_low": 0.5973969263791727,
+      "rmse_high": 0.8029746607881997
+    },
+    {
+      "family": "lstm",
+      "algorithm": "LSTM",
+      "rmse_low": 0.6014158513597535,
+      "rmse_high": 0.7932001606132256
+    }
+  ],
+  "paired_differences": [
+    {
+      "first": "random_forest",
+      "second": "xgboost",
+      "difference_rmse": 0.012669898776156097,
+      "ci_low": 0.0011677446395973734,
+      "ci_high": 0.026542654827552716,
+      "includes_zero": false
+    },
+    {
+      "first": "random_forest",
+      "second": "lstm",
+      "difference_rmse": 0.017294431448321768,
+      "ci_low": -0.003717672876709596,
+      "ci_high": 0.042841023060045794,
+      "includes_zero": true
+    },
+    {
+      "first": "xgboost",
+      "second": "lstm",
+      "difference_rmse": 0.004624532672165671,
+      "ci_low": -0.0060456941247513055,
+      "ci_high": 0.016255655350648265,
+      "includes_zero": true
+    }
+  ]
+}
