@@ -1,0 +1,28 @@
+{
+  "seed": 23045,
+  "mask_seed": 2026,
+  "window": 6,
+  "threads": 6,
+  "train_end": "2010-12-01",
+  "tuning_start": "2011-01-01",
+  "tuning_end": "2012-12-01",
+  "confirmation_start": "2013-01-01",
+  "confirmation_end": "2013-12-01",
+  "holdout_start": "2014-01-01",
+  "holdout_end": "2015-09-01",
+  "random_forest": [
+    {"name": "RF_1", "n_estimators": 180, "max_depth": 18, "min_samples_leaf": 30, "max_features": 0.8, "max_samples": 250000},
+    {"name": "RF_2", "n_estimators": 260, "max_depth": 24, "min_samples_leaf": 12, "max_features": 0.8, "max_samples": 350000},
+    {"name": "RF_3", "n_estimators": 300, "max_depth": 28, "min_samples_leaf": 6, "max_features": 0.65, "max_samples": 400000}
+  ],
+  "xgboost": [
+    {"name": "XGB_1", "max_depth": 4, "learning_rate": 0.06, "n_estimators": 1400, "min_child_weight": 30, "subsample": 0.85, "colsample_bytree": 0.85, "reg_lambda": 10.0},
+    {"name": "XGB_2", "max_depth": 6, "learning_rate": 0.04, "n_estimators": 1600, "min_child_weight": 30, "subsample": 0.85, "colsample_bytree": 0.85, "reg_lambda": 20.0},
+    {"name": "XGB_3", "max_depth": 8, "learning_rate": 0.035, "n_estimators": 1800, "min_child_weight": 60, "subsample": 0.85, "colsample_bytree": 0.85, "reg_lambda": 30.0}
+  ],
+  "lstm": [
+    {"name": "LSTM_1", "hidden_size": 32, "head_size": 32, "dropout": 0.10, "learning_rate": 0.001, "weight_decay": 0.0001, "max_epochs": 35, "batch_size": 2048, "patience": 6},
+    {"name": "LSTM_2", "hidden_size": 64, "head_size": 32, "dropout": 0.15, "learning_rate": 0.0007, "weight_decay": 0.0002, "max_epochs": 40, "batch_size": 2048, "patience": 7},
+    {"name": "LSTM_3", "hidden_size": 64, "head_size": 64, "dropout": 0.25, "learning_rate": 0.0005, "weight_decay": 0.001, "max_epochs": 45, "batch_size": 2048, "patience": 7}
+  ]
+}
