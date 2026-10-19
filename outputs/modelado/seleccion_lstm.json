@@ -1,0 +1,67 @@
+{
+  "configuration": {
+    "name": "LSTM_3",
+    "hidden_size": 64,
+    "head_size": 64,
+    "dropout": 0.25,
+    "learning_rate": 0.0005,
+    "weight_decay": 0.001,
+    "max_epochs": 45,
+    "batch_size": 2048,
+    "patience": 7
+  },
+  "tuning": {
+    "family": "lstm",
+    "name": "LSTM_3",
+    "stage": "tuning",
+    "parameters": {
+      "hidden_size": 64,
+      "head_size": 64,
+      "dropout": 0.25,
+      "learning_rate": 0.0005,
+      "weight_decay": 0.001,
+      "max_epochs": 45,
+      "batch_size": 2048,
+      "patience": 7
+    },
+    "fit_seconds": 103.03822366701206,
+    "peak_rss_mb": 1567.546875,
+    "train_rows": 1529620,
+    "train_target_end": "2010-12-01",
+    "training_diagnostic_sample": {
+      "n": 20000,
+      "rmse": 0.5360480379954692,
+      "mae": 0.3963762662280329,
+      "r2": 0.6673859286897535,
+      "bias": -7.980555555186584e-05
+    },
+    "best_epochs": 1,
+    "parameter_count": 23745,
+    "predict_seconds": 0.5448884999932488,
+    "validation": {
+      "n": 249667,
+      "rmse": 0.56102826579664,
+      "mae": 0.42391450375949347,
+      "r2": 0.61676002953002,
+      "bias": 0.015186954889236683
+    },
+    "groups": {
+      "False": {
+        "n": 94081,
+        "rmse": 0.5129856402009871,
+        "mae": 0.383050909001222,
+        "r2": 0.6801375527842549,
+        "bias": 0.01340137114757015
+      },
+      "True": {
+        "n": 155586,
+        "rmse": 0.5881782736421741,
+        "mae": 0.4486242325169199,
+        "r2": 0.5783165800999537,
+        "bias": 0.01626667609808407
+      }
+    },
+    "inference_ms_per_1000": 2.591900000697933,
+    "model_bytes": 98981
+  }
+}

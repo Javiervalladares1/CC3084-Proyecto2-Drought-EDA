@@ -1,0 +1,162 @@
+{
+  "criterion": "Menor RMSE de confirmación temporal 2013, antes de abrir la prueba final",
+  "recommended_family": "xgboost",
+  "confirmation": {
+    "random_forest": {
+      "family": "random_forest",
+      "name": "RF_1",
+      "stage": "confirmation",
+      "parameters": {
+        "n_estimators": 180,
+        "max_depth": 18,
+        "min_samples_leaf": 30,
+        "max_features": 0.8,
+        "max_samples": 250000
+      },
+      "fit_seconds": 243.48087075000512,
+      "peak_rss_mb": 1848.015625,
+      "train_rows": 1779287,
+      "train_target_end": "2012-10-01",
+      "training_diagnostic_sample": {
+        "n": 20000,
+        "rmse": 0.4879310626846827,
+        "mae": 0.3524322169869636,
+        "r2": 0.7193426278889397,
+        "bias": 0.006963312457896973
+      },
+      "predict_seconds": 0.19702837499789894,
+      "validation": {
+        "n": 109287,
+        "rmse": 0.5430091281526662,
+        "mae": 0.409593543458784,
+        "r2": 0.4625427006430385,
+        "bias": 0.041170732287547675
+      },
+      "groups": {
+        "False": {
+          "n": 31424,
+          "rmse": 0.4535756788775867,
+          "mae": 0.33962836252768475,
+          "r2": 0.624705450855668,
+          "bias": -0.007713663821248892
+        },
+        "True": {
+          "n": 77863,
+          "rmse": 0.5751775865180971,
+          "mae": 0.43783013652068575,
+          "r2": 0.39523544361663676,
+          "bias": 0.06089952854922297
+        }
+      },
+      "inference_ms_per_1000": 3.163450000283774,
+      "model_bytes": 45107716
+    },
+    "xgboost": {
+      "family": "xgboost",
+      "name": "XGB_1",
+      "stage": "confirmation",
+      "parameters": {
+        "max_depth": 4,
+        "learning_rate": 0.06,
+        "n_estimators": 552,
+        "min_child_weight": 30,
+        "subsample": 0.85,
+        "colsample_bytree": 0.85,
+        "reg_lambda": 10.0
+      },
+      "fit_seconds": 14.332069333002437,
+      "peak_rss_mb": 2305.515625,
+      "train_rows": 1779287,
+      "train_target_end": "2012-10-01",
+      "training_diagnostic_sample": {
+        "n": 20000,
+        "rmse": 0.5160323178362686,
+        "mae": 0.378166424528238,
+        "r2": 0.6860840932204318,
+        "bias": 0.007357586152303702
+      },
+      "best_iterations": 552,
+      "predict_seconds": 0.059263082992401905,
+      "validation": {
+        "n": 109287,
+        "rmse": 0.5423571693668197,
+        "mae": 0.40956810100288055,
+        "r2": 0.463832511948026,
+        "bias": 0.02878876175574455
+      },
+      "groups": {
+        "False": {
+          "n": 31424,
+          "rmse": 0.453803712187137,
+          "mae": 0.34061187497873646,
+          "r2": 0.6243280004124687,
+          "bias": -0.040324804076318194
+        },
+        "True": {
+          "n": 77863,
+          "rmse": 0.5742408524416692,
+          "mae": 0.4373974993895687,
+          "r2": 0.3972036783937274,
+          "bias": 0.056681659444078415
+        }
+      },
+      "inference_ms_per_1000": 0.5718333006370813,
+      "model_bytes": 944933
+    },
+    "lstm": {
+      "family": "lstm",
+      "name": "LSTM_3",
+      "stage": "confirmation",
+      "parameters": {
+        "hidden_size": 64,
+        "head_size": 64,
+        "dropout": 0.25,
+        "learning_rate": 0.0005,
+        "weight_decay": 0.001,
+        "max_epochs": 45,
+        "batch_size": 2048,
+        "patience": 7
+      },
+      "fit_seconds": 14.66337595799996,
+      "peak_rss_mb": 1934.875,
+      "train_rows": 1779287,
+      "train_target_end": "2012-10-01",
+      "training_diagnostic_sample": {
+        "n": 20000,
+        "rmse": 0.535421897963259,
+        "mae": 0.3964996146027777,
+        "r2": 0.6620505229423094,
+        "bias": 0.008137232122115529
+      },
+      "best_epochs": 1,
+      "parameter_count": 23745,
+      "predict_seconds": 0.2512919579894515,
+      "validation": {
+        "n": 109287,
+        "rmse": 0.5496127122254244,
+        "mae": 0.41798142276546296,
+        "r2": 0.44939107937846,
+        "bias": 0.03377927965571974
+      },
+      "groups": {
+        "False": {
+          "n": 31424,
+          "rmse": 0.45319431318110753,
+          "mae": 0.33785739094566825,
+          "r2": 0.6253362796428867,
+          "bias": -0.02907627968772657
+        },
+        "True": {
+          "n": 77863,
+          "rmse": 0.5840342130970436,
+          "mae": 0.450317931452583,
+          "r2": 0.37646763572899233,
+          "bias": 0.059146567029805724
+        }
+      },
+      "inference_ms_per_1000": 2.574633399490267,
+      "model_bytes": 98981
+    }
+  },
+  "config_sha256": "907189514ba88c64b211e775f50d7496dd8c681aeb9a8abc8694eec661def7f2"
+}

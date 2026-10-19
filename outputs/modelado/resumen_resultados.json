@@ -1,0 +1,475 @@
+{
+  "recommended_family": "xgboost",
+  "best_holdout_family_descriptive": "lstm",
+  "holdout_rows": 265447,
+  "holdout_observed_months": 17,
+  "holdout_mask_rate": 0.7039710375329161,
+  "holdout_results": [
+    {
+      "stage": "holdout",
+      "family": "random_forest",
+      "algorithm": "Random Forest",
+      "n": 265447,
+      "rmse": 0.7161508274276793,
+      "mae": 0.5290163865309945,
+      "r2": 0.28369683396671963,
+      "bias": 0.03118421673434363,
+      "fit_seconds": 247.18306754199148,
+      "predict_seconds": 0.4970275420055259,
+      "inference_ms_per_1000": 3.076487500220537,
+      "peak_rss_mb": 2329.328125,
+      "model_size_mb": 43.454304695129395,
+      "configuration": "RF_1",
+      "improvement_vs_persistence_pct": 15.608265377899144
+    },
+    {
+      "stage": "holdout",
+      "family": "xgboost",
+      "algorithm": "XGBoost",
+      "n": 265447,
+      "rmse": 0.7034809286515232,
+      "mae": 0.5207523301382684,
+      "r2": 0.30881782251049683,
+      "bias": 0.023922855843501522,
+      "fit_seconds": 23.574744457990164,
+      "predict_seconds": 0.28188162500737235,
+      "inference_ms_per_1000": 1.1325083003612235,
+      "peak_rss_mb": 2401.53125,
+      "model_size_mb": 0.9004449844360352,
+      "configuration": "XGB_1",
+      "improvement_vs_persistence_pct": 17.1012954691256
+    },
+    {
+      "stage": "holdout",
+      "family": "lstm",
+      "algorithm": "LSTM",
+      "n": 265447,
+      "rmse": 0.6988563959793576,
+      "mae": 0.518603489963097,
+      "r2": 0.3178753199535067,
+      "bias": 0.032589167512999895,
+      "fit_seconds": 18.333872167000663,
+      "predict_seconds": 0.6719824579922715,
+      "inference_ms_per_1000": 2.7550917002372444,
+      "peak_rss_mb": 2221.65625,
+      "model_size_mb": 0.09439563751220703,
+      "configuration": "LSTM_3",
+      "improvement_vs_persistence_pct": 17.646253764325014
+    }
+  ],
+  "baselines_holdout": [
+    {
+      "stage": "holdout",
+      "algorithm": "Persistencia causal",
+      "n": 265447,
+      "rmse": 0.8486030422701263,
+      "mae": 0.610594398037683,
+      "r2": -0.0057662160008851,
+      "bias": 0.0433880135060104
+    },
+    {
+      "stage": "holdout",
+      "algorithm": "Climatología mensual",
+      "n": 265447,
+      "rmse": 1.1148799893080814,
+      "mae": 0.9348663531565172,
+      "r2": -0.7359775945359877,
+      "bias": 0.1934469142755548
+    }
+  ],
+  "extreme_thresholds_training": {
+    "p10": -1.0909910321235656,
+    "p90": 1.2966929793357849
+  },
+  "extreme_results": [
+    {
+      "extreme_group": "Bajo percentil 10",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 25849,
+      "rmse": 1.2124187703581957,
+      "mae": 1.0255064494043233,
+      "r2": -9.473700016496203,
+      "bias": 1.00385830704448
+    },
+    {
+      "extreme_group": "Bajo percentil 10",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 25849,
+      "rmse": 1.2058847189046118,
+      "mae": 1.0215514872437585,
+      "r2": -9.361113033704854,
+      "bias": 1.004500919138437
+    },
+    {
+      "extreme_group": "Bajo percentil 10",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 25849,
+      "rmse": 1.1899391662382481,
+      "mae": 0.9989107975024789,
+      "r2": -9.088912297993478,
+      "bias": 0.9859709566763472
+    },
+    {
+      "extreme_group": "Intervalo central",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 222661,
+      "rmse": 0.5658082730141204,
+      "mae": 0.4294418135399937,
+      "r2": 0.03177050522426006,
+      "bias": 0.0016922510306909028
+    },
+    {
+      "extreme_group": "Intervalo central",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 222661,
+      "rmse": 0.5496564473211566,
+      "mae": 0.4198379019453835,
+      "r2": 0.08626055190725024,
+      "bias": -0.006633568433103297
+    },
+    {
+      "extreme_group": "Intervalo central",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 222661,
+      "rmse": 0.5522684049419255,
+      "mae": 0.42394916660570897,
+      "r2": 0.07755577137557068,
+      "bias": 0.001677838354734401
+    },
+    {
+      "extreme_group": "Sobre percentil 90",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 16937,
+      "rmse": 1.2593369355542077,
+      "mae": 1.080330217878727,
+      "r2": -9.355119749460188,
+      "bias": -1.0655827422835282
+    },
+    {
+      "extreme_group": "Sobre percentil 90",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 16937,
+      "rmse": 1.2510015324072274,
+      "mae": 1.0831039912255989,
+      "r2": -9.218494762318723,
+      "bias": -1.0709132055757395
+    },
+    {
+      "extreme_group": "Sobre percentil 90",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 16937,
+      "rmse": 1.2181265094568696,
+      "mae": 1.029931511483667,
+      "r2": -8.688488599217642,
+      "bias": -1.0160746103918719
+    }
+  ],
+  "uncertainty": {
+    "repetitions": 2000,
+    "block_length_observed_months": 3,
+    "observed_months": 17,
+    "method": "Bootstrap circular de bloques temporales de meses observados; celdas del mismo mes se mantienen juntas",
+    "intervals": [
+      {
+        "family": "random_forest",
+        "algorithm": "Random Forest",
+        "rmse_low": 0.6015539011202159,
+        "rmse_high": 0.8237035121609533
+      },
+      {
+        "family": "xgboost",
+        "algorithm": "XGBoost",
+        "rmse_low": 0.5973969263791727,
+        "rmse_high": 0.8029746607881997
+      },
+      {
+        "family": "lstm",
+        "algorithm": "LSTM",
+        "rmse_low": 0.6014158513597535,
+        "rmse_high": 0.7932001606132256
+      }
+    ],
+    "paired_differences": [
+      {
+        "first": "random_forest",
+        "second": "xgboost",
+        "difference_rmse": 0.012669898776156097,
+        "ci_low": 0.0011677446395973734,
+        "ci_high": 0.026542654827552716,
+        "includes_zero": false
+      },
+      {
+        "first": "random_forest",
+        "second": "lstm",
+        "difference_rmse": 0.017294431448321768,
+        "ci_low": -0.003717672876709596,
+        "ci_high": 0.042841023060045794,
+        "includes_zero": true
+      },
+      {
+        "first": "xgboost",
+        "second": "lstm",
+        "difference_rmse": 0.004624532672165671,
+        "ci_low": -0.0060456941247513055,
+        "ci_high": 0.016255655350648265,
+        "includes_zero": true
+      }
+    ]
+  },
+  "by_availability": [
+    {
+      "availability": "Observado",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 78580,
+      "rmse": 0.7287923973448701,
+      "mae": 0.5304217156522724,
+      "r2": 0.26720161711886703,
+      "bias": 0.09884366341633673
+    },
+    {
+      "availability": "Observado",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 78580,
+      "rmse": 0.7174980276907039,
+      "mae": 0.5239750508197445,
+      "r2": 0.28973852575072523,
+      "bias": 0.08732600340711069
+    },
+    {
+      "availability": "Observado",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 78580,
+      "rmse": 0.7034408432731397,
+      "mae": 0.5134666762006663,
+      "r2": 0.317296708298451,
+      "bias": 0.07173217258596837
+    },
+    {
+      "availability": "Oculto",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 186867,
+      "rmse": 0.710767732751899,
+      "mae": 0.5284254273870579,
+      "r2": 0.2897912582137673,
+      "bias": 0.002732540835062231
+    },
+    {
+      "availability": "Oculto",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 186867,
+      "rmse": 0.6975024287954998,
+      "mae": 0.5193971342441277,
+      "r2": 0.31605362059677544,
+      "bias": -0.0027389910077264073
+    },
+    {
+      "availability": "Oculto",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 186867,
+      "rmse": 0.6969195693010384,
+      "mae": 0.5207635868526056,
+      "r2": 0.31719620609380983,
+      "bias": 0.01612902560119169
+    }
+  ],
+  "by_region": [
+    {
+      "region": "Norte extratropical",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 160788,
+      "rmse": 0.679016026932573,
+      "mae": 0.5018367850507116,
+      "r2": 0.30080867315471793,
+      "bias": 0.08454344278897212
+    },
+    {
+      "region": "Norte extratropical",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 160788,
+      "rmse": 0.6686913567004054,
+      "mae": 0.49559773454604544,
+      "r2": 0.321909903539624,
+      "bias": 0.06695055199326826
+    },
+    {
+      "region": "Norte extratropical",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 160788,
+      "rmse": 0.6680716836839652,
+      "mae": 0.49683779813011786,
+      "r2": 0.3231660867857694,
+      "bias": 0.06333753431989347
+    },
+    {
+      "region": "Sur extratropical",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 9673,
+      "rmse": 0.744711880220162,
+      "mae": 0.545210220912138,
+      "r2": -0.08057250083827316,
+      "bias": -0.13004911626121163
+    },
+    {
+      "region": "Sur extratropical",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 9673,
+      "rmse": 0.7166787134556716,
+      "mae": 0.5255301073979277,
+      "r2": -0.0007517488120836191,
+      "bias": -0.07429496210755702
+    },
+    {
+      "region": "Sur extratropical",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 9673,
+      "rmse": 0.7172615017226162,
+      "mae": 0.5301404610064193,
+      "r2": -0.0023799917057953923,
+      "bias": -0.05822769654364384
+    },
+    {
+      "region": "Trópico norte",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 52370,
+      "rmse": 0.7810752804859724,
+      "mae": 0.5746234862621709,
+      "r2": 0.13906281208381377,
+      "bias": -0.06457626865081229
+    },
+    {
+      "region": "Trópico norte",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 52370,
+      "rmse": 0.7735103268032751,
+      "mae": 0.5723703431300058,
+      "r2": 0.15565893323419056,
+      "bias": -0.09485834818613446
+    },
+    {
+      "region": "Trópico norte",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 52370,
+      "rmse": 0.7614378121529848,
+      "mae": 0.5640721942901443,
+      "r2": 0.18180926049563562,
+      "bias": -0.04843590127533617
+    },
+    {
+      "region": "Trópico sur",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 42616,
+      "rmse": 0.7611963076323128,
+      "mae": 0.5718422498199285,
+      "r2": 0.3435985393104197,
+      "bias": -0.015862352375497383
+    },
+    {
+      "region": "Trópico sur",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 42616,
+      "rmse": 0.737315978944998,
+      "mae": 0.5511424731895253,
+      "r2": 0.3841378911880744,
+      "bias": 0.02984305951216895
+    },
+    {
+      "region": "Trópico sur",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 42616,
+      "rmse": 0.727287921350191,
+      "mae": 0.5422300361413289,
+      "r2": 0.4007763539409007,
+      "bias": 0.03676098036071596
+    }
+  ],
+  "worst_months": [
+    {
+      "target_time": "2015-07-01",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 15581,
+      "rmse": 1.105853459911522,
+      "mae": 0.873212392954575,
+      "r2": -0.12837874770857693,
+      "bias": 0.3163449048300655
+    },
+    {
+      "target_time": "2015-07-01",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 15581,
+      "rmse": 1.0986924974885452,
+      "mae": 0.8718098455129316,
+      "r2": -0.11381241292149546,
+      "bias": 0.3297045806496881
+    },
+    {
+      "target_time": "2015-07-01",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 15581,
+      "rmse": 1.0876709711128323,
+      "mae": 0.8591649814605097,
+      "r2": -0.09157809340828749,
+      "bias": 0.33565821362805465
+    },
+    {
+      "target_time": "2015-03-01",
+      "algorithm": "LSTM",
+      "family": "lstm",
+      "n": 15670,
+      "rmse": 1.047834348585452,
+      "mae": 0.7666869103653604,
+      "r2": 0.1470351186982618,
+      "bias": 0.14769409971978473
+    },
+    {
+      "target_time": "2015-03-01",
+      "algorithm": "Random Forest",
+      "family": "random_forest",
+      "n": 15670,
+      "rmse": 1.0475289204236526,
+      "mae": 0.7672950849204,
+      "r2": 0.14753229943554835,
+      "bias": 0.1199377388895891
+    },
+    {
+      "target_time": "2015-03-01",
+      "algorithm": "XGBoost",
+      "family": "xgboost",
+      "n": 15670,
+      "rmse": 1.0469133785362497,
+      "mae": 0.7655786755204476,
+      "r2": 0.14853384774242262,
+      "bias": 0.09655503581843772
+    }
+  ],
+  "selection_criterion": "Menor RMSE de confirmación temporal 2013, antes de abrir la prueba final"
+}

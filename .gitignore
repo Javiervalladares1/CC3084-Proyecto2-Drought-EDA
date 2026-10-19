@@ -6,6 +6,7 @@ data/processed/*
 !data/processed/.gitkeep
 
 # --- Entornos virtuales ------------------------------------------------------
+.venv
 .venv/
 venv/
 env/
@@ -32,3 +33,16 @@ tmp/
 # --- Carpeta de entrega ------------------------------------------------------
 # Se reconstruye con scripts/preparar_entrega.py; versionarla duplicaria todo.
 repo/
+
+# --- Modelos entrenados y entrega de resultados -----------------------------
+# Los manifiestos y métricas se versionan; los pesos se reproducen con el script.
+models/
+entrega_parte2/
+*.zip
+
+# Recursos de ejecución distribuidos en el ZIP local
+outputs/modelado/*.parquet
+outputs/modelado/submission_*.csv
+# Versión intermedia reemplazada por la presentación final verificada
+output/presentacion/Proyecto2_Resultados_TWS.pptx
+.chart-data-*/

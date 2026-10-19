@@ -1,0 +1,11 @@
+# Etapa de resultados. Las versiones exactas usadas se guardan en el manifiesto.
+-r requirements.txt
+scikit-learn>=1.5,<2
+xgboost>=2.1,<4
+torch>=2.5,<3
+streamlit>=1.40,<2
+plotly>=5.24,<8
+joblib>=1.4,<2
+psutil>=6,<8
+pytest>=8,<10
+python-docx>=1.1,<2
