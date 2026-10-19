@@ -1,0 +1,98 @@
+[
+  {
+    "slide": 1,
+    "title": "Pronóstico del almacenamiento total de agua",
+    "seconds": 30,
+    "notes": "Presentar el problema, las tres familias y el propósito de comparar resultados fuera de muestra."
+  },
+  {
+    "slide": 2,
+    "title": "El problema y la información disponible",
+    "seconds": 55,
+    "notes": "Explicar que el objetivo es continuo, que t+1 es calendario y que el horizonte desde el último TWS cambia con sus faltantes. No interpretar valores estandarizados como centímetros. Fuente oficial del reto."
+  },
+  {
+    "slide": 3,
+    "title": "Datos y hallazgos exploratorios",
+    "seconds": 55,
+    "notes": "Destacar cantidad de filas frente a cantidad de meses independientes. Explicar el calendario y el desbalance espacial. Las cantidades proceden de la auditoría local."
+  },
+  {
+    "slide": 4,
+    "title": "Comparación temporal antes de la prueba final",
+    "seconds": 70,
+    "notes": "Describir selección de configuraciones y de familia. La última etiqueta de entrenamiento precede a la primera de evaluación. La fecha usada es el mes del objetivo. No dividir filas aleatoriamente."
+  },
+  {
+    "slide": 5,
+    "title": "Literatura y elección de las tres familias",
+    "seconds": 55,
+    "notes": "Citar los antecedentes aplicados y distinguir reconstrucción de pronóstico. Random Forest y boosting aparecen en A. Y. Sun et al. 2021. Li y Kusche 2026 y Palazzoli et al. 2025 respaldan memoria temporal. DOI: 10.1029/2020WR028666; 10.1029/2025WR041710; 10.1038/s41597-025-04403-3."
+  },
+  {
+    "slide": 6,
+    "title": "Entradas causales compartidas",
+    "seconds": 60,
+    "notes": "Explicar que los árboles reciben 57 valores aplanados y la LSTM la misma información organizada como secuencia y contexto. No usar target(t-1) para recuperar TWS oculto. El cero de relleno tiene indicadores explícitos."
+  },
+  {
+    "slide": 7,
+    "title": "Random Forest y ajuste de configuraciones",
+    "seconds": 55,
+    "notes": "Explicar tres configuraciones y elegir por RMSE de validación. La configuración seleccionada es RF_1. Los tiempos completos están en el informe. La mayor complejidad no garantiza mejor validación."
+  },
+  {
+    "slide": 8,
+    "title": "XGBoost y ajuste de configuraciones",
+    "seconds": 55,
+    "notes": "Explicar tres configuraciones y elegir por RMSE de validación. La configuración seleccionada es XGB_1. Los tiempos completos están en el informe. La mayor complejidad no garantiza mejor validación."
+  },
+  {
+    "slide": 9,
+    "title": "LSTM y parada temprana",
+    "seconds": 60,
+    "notes": "Describir una capa recurrente y una cabeza densa. Las tres configuraciones mejoraron inicialmente y luego sobreajustaron validación temporal. Se recuperó la mejor época, no la última. La red seleccionada usa el número de épocas fijado en validación."
+  },
+  {
+    "slide": 10,
+    "title": "Resultados de la prueba temporal reservada",
+    "seconds": 65,
+    "notes": "Comparar siempre con referencias bajo la misma máscara y fechas. Estos resultados pertenecen a 265447 filas de 17 meses observados de 2014-2015. El archivo Test no tiene etiquetas y no aparece como una evaluación de precisión."
+  },
+  {
+    "slide": 11,
+    "title": "Disponibilidad de TWS y precisión",
+    "seconds": 55,
+    "notes": "Mostrar que disponer del TWS actual cambia las condiciones de predicción. Los grupos tienen fechas diferentes, por lo que no se interpreta como efecto causal aislado. La tabla completa de antigüedad y región está en la entrega."
+  },
+  {
+    "slide": 12,
+    "title": "El error cambia entre regiones",
+    "seconds": 55,
+    "notes": "Relacionar el desbalance espacial y el error por región. No interpretar el promedio global como una garantía para todas las celdas. La evaluación usa ubicaciones conocidas y nuevas fechas."
+  },
+  {
+    "slide": 13,
+    "title": "Eficiencia e incertidumbre de la comparación",
+    "seconds": 70,
+    "notes": "Explicar tiempos locales con modelos cargados. La LSTM tiene el menor RMSE final descriptivo, pero la diferencia frente a XGBoost incluye cero en el intervalo de bloques temporales. La selección previa fue XGBoost. No atribuir superioridad universal al ganador de una sola prueba."
+  },
+  {
+    "slide": 14,
+    "title": "Aplicación para explorar y pronosticar",
+    "seconds": 65,
+    "notes": "Demostrar la aplicación. La captura muestra una predicción real con modelos de producción. Se puede cargar CSV y elegir uno o los tres modelos. Las métricas provienen de modelos separados que conservaron la prueba reservada."
+  },
+  {
+    "slide": 15,
+    "title": "Conclusiones y límites de uso",
+    "seconds": 60,
+    "notes": "Concluir sobre cumplimiento de objetivos y condiciones de validez. El resultado no es una categoría de sequía ni volumen físico. Test no tiene etiquetas y las fechas futuras pueden cambiar de distribución. Las 280961 predicciones por algoritmo están completas."
+  },
+  {
+    "slide": 16,
+    "title": "Entrega y reproducción del proyecto",
+    "seconds": 35,
+    "notes": "Indicar dónde están los entregables y el comando de la aplicación. El informe incluye once referencias científicas y bibliografía técnica, y explica el protocolo y los resultados. Aclarar que los datos originales se descargan desde Zindi para reentrenar."
+  }
+]
